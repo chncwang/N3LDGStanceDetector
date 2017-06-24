@@ -49,7 +49,7 @@ public:
 	vector<string> m_sparse_feats;
 	string m_label; //TODO
 	Stance m_stance;
-	string *m_target;
+	const string *m_target;
 };
 
 #endif /*_INSTANCE_H_*/

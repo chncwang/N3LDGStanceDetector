@@ -1,7 +1,7 @@
 #include "NNCNNLabeler.h"
 #include "Stance.h"
 
-#include <chrono>
+#include <chrono> 
 #include "Argument_helper.h"
 
 Classifier::Classifier(int memsize) : m_driver(memsize) {
@@ -144,42 +144,22 @@ void Classifier::train(const string &trainFile, const string &devFile,
   if (optionFile != "")
     m_options.load(optionFile);
   m_options.showOptions();
-  vector<Instance> trainInsts, devInsts, testInsts;
+  vector<Instance> trainInsts = readInstancesFromFile(trainFile);
+  vector<Instance> devInsts = readInstancesFromFile(devFile);
+  vector<Instance> testInsts = readInstancesFromFile(testFile);
   static vector<Instance> decodeInstResults;
   static Instance curDecodeInst;
   bool bCurIterBetter = false;
 
-  m_pipe.readInstances(trainFile, trainInsts, m_options.maxInstance);
-  if (devFile != "")
-    m_pipe.readInstances(devFile, devInsts, m_options.maxInstance);
-  if (testFile != "")
-    m_pipe.readInstances(testFile, testInsts, m_options.maxInstance);
-
-  //Ensure that each file in m_options.testFiles exists!
-  vector<vector<Instance> > otherInsts(m_options.testFiles.size());
-  for (int idx = 0; idx < m_options.testFiles.size(); idx++) {
-    m_pipe.readInstances(m_options.testFiles[idx], otherInsts[idx],
-        m_options.maxInstance);
-  }
-
   createAlphabet(trainInsts);
   addTestAlpha(devInsts);
   addTestAlpha(testInsts);
-  for (int idx = 0; idx < otherInsts.size(); idx++) {
-    addTestAlpha(otherInsts[idx]);
-  }
 
   vector<Example> trainExamples, devExamples, testExamples;
 
   initialExamples(trainInsts, trainExamples);
   initialExamples(devInsts, devExamples);
   initialExamples(testInsts, testExamples);
-  vector<int> otherInstNums(otherInsts.size());
-  vector<vector<Example> > otherExamples(otherInsts.size());
-  for (int idx = 0; idx < otherInsts.size(); idx++) {
-    initialExamples(otherInsts[idx], otherExamples[idx]);
-    otherInstNums[idx] = otherExamples[idx].size();
-  }
 
   m_word_stats[unknownkey] = m_options.wordCutOff + 1;
   m_driver._modelparams.wordAlpha.initial(m_word_stats, m_options.wordCutOff);
@@ -422,51 +402,57 @@ void Classifier::writeModelFile(const string &outputModelFile) {
 
 #include "Targets.h"
 
-int main(int argc, char *argv[]) {
-	vector<string> lines = readLines("C:/data/stance_data/semeval2016-task6-trainingdata.txt");
-	for (string &line : lines) {
-		cout << line << endl;
-	}
-	while (true);
-	return 0;
-}
-
-
 //int main(int argc, char *argv[]) {
-//  std::string trainFile = "", devFile = "", testFile = "", modelFile = "", optionFile = "";
-//  std::string outputFile = "";
-//  bool bTrain = false;
-//  int memsize = 0;
-//  dsr::Argument_helper ah;
+//	vector<Instance> instances = readInstancesFromFile("C:/data/stance_data/semeval2016-task6-trainingdata.txt");
 //
-//  ah.new_flag("l", "learn", "train or test", bTrain);
-//  ah.new_named_string("train", "trainCorpus", "named_string",
-//      "training corpus to train a model, must when training", trainFile);
-//  ah.new_named_string("dev", "devCorpus", "named_string",
-//      "development corpus to train a model, optional when training", devFile);
-//  ah.new_named_string("test", "testCorpus", "named_string",
-//      "testing corpus to train a model or input file to test a model, optional when training and must when testing",
-//      testFile);
-//  ah.new_named_string("model", "modelFile", "named_string",
-//      "model file, must when training and testing", modelFile);
-//  ah.new_named_string("option", "optionFile", "named_string",
-//      "option file to train a model, optional when training", optionFile);
-//  ah.new_named_string("output", "outputFile", "named_string",
-//      "output file to test, must when testing", outputFile);
-//  ah.new_named_int("memsize", "memorySize", "named_int",
-//      "This argument decides the size of static memory allocation", memsize);
+//	for (Instance &ins : instances) {
+//		std::cout << ins.m_stance << " " << *ins.m_target << endl;
+//		for (string &w : ins.m_words) {
+//			std::cout << w << "|";
+//		}
+//		std::cout << std::endl;
+//	}
 //
-//  ah.process(argc, argv);
-//
-//  if (memsize < 0)
-//    memsize = 0;
-//  Classifier the_classifier(memsize);
-//  if (bTrain) {
-//    the_classifier.train(trainFile, devFile, testFile, modelFile, optionFile);
-//  } else {
-//    the_classifier.test(testFile, outputFile, modelFile);
-//  }
-//  //getchar();
-//  //test(argv);
-//  //ah.write_values(std::cout);
+//	while (true);
+//	return 0;
 //}
+
+
+int main(int argc, char *argv[]) {
+  std::string trainFile = "", devFile = "", testFile = "", modelFile = "", optionFile = "";
+  std::string outputFile = "";
+  bool bTrain = false;
+  int memsize = 0;
+  dsr::Argument_helper ah;
+
+  ah.new_flag("l", "learn", "train or test", bTrain);
+  ah.new_named_string("train", "trainCorpus", "named_string",
+      "training corpus to train a model, must when training", trainFile);
+  ah.new_named_string("dev", "devCorpus", "named_string",
+      "development corpus to train a model, optional when training", devFile);
+  ah.new_named_string("test", "testCorpus", "named_string",
+      "testing corpus to train a model or input file to test a model, optional when training and must when testing",
+      testFile);
+  ah.new_named_string("model", "modelFile", "named_string",
+      "model file, must when training and testing", modelFile);
+  ah.new_named_string("option", "optionFile", "named_string",
+      "option file to train a model, optional when training", optionFile);
+  ah.new_named_string("output", "outputFile", "named_string",
+      "output file to test, must when testing", outputFile);
+  ah.new_named_int("memsize", "memorySize", "named_int",
+      "This argument decides the size of static memory allocation", memsize);
+
+  ah.process(argc, argv);
+
+  if (memsize < 0)
+    memsize = 0;
+  Classifier the_classifier(memsize);
+  if (bTrain) {
+    the_classifier.train(trainFile, devFile, testFile, modelFile, optionFile);
+  } else {
+    the_classifier.test(testFile, outputFile, modelFile);
+  }
+  //getchar();
+  //test(argv);
+  //ah.write_values(std::cout);
+}
