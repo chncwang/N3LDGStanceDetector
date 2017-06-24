@@ -1,0 +1,1 @@
+cmake .. -Dboost=C:\Lib\boost_1_64_0
