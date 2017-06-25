@@ -13,21 +13,20 @@ public:
 	void clear()
 	{
 		m_tweet_words.clear();
-		m_label.clear();
 		m_sparse_feats.clear();
 	}
 
-	void evaluate(const string& predict_label, Metric& eval) const
+	void evaluate(Stance predict_stance, Metric& eval) const
 	{
-		if (predict_label == m_label)
+		if (predict_stance == m_stance) {
 			eval.correct_label_count++;
+		}
 		eval.overall_label_count++;
 	}
 
 	void copyValuesFrom(const Instance& anInstance)
 	{
 		allocate(anInstance.size());
-		m_label = anInstance.m_label;
 		m_tweet_words = anInstance.m_tweet_words;
 		m_sparse_feats = anInstance.m_sparse_feats;
 		m_stance = anInstance.m_stance;
@@ -43,13 +42,9 @@ public:
 		clear();
 		m_tweet_words.resize(length);
 	}
-	void assignLabel(const string &label) {
-		m_label = label;
-	}
 public:
 	vector<string> m_tweet_words;
 	vector<string> m_sparse_feats;
-	string m_label; //TODO
 	Stance m_stance;
 	const std::vector<std::string> *m_target_words;
 };

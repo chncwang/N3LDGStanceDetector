@@ -3,6 +3,7 @@
 
 #include <chrono> 
 #include "Argument_helper.h"
+#include "Reader.h"
 
 Classifier::Classifier(int memsize) : m_driver(memsize) {
   srand(0);
@@ -25,20 +26,25 @@ int Classifier::createAlphabet(const vector<Instance> &vecInsts) {
   for (numInstance = 0; numInstance < vecInsts.size(); numInstance++) {
     const Instance *pInstance = &vecInsts[numInstance];
 
-    const vector<string> &words = pInstance->m_tweet_words;
-    const vector<string> &sparse_feats = pInstance->m_sparse_feats;
-    const string &label = pInstance->m_label;
+    vector<const string *> words;
+	for (const string &w : *(pInstance->m_target_words)) {
+		words.push_back(&w);
+	}
 
-    m_driver._modelparams.labelAlpha.from_string(label);
-    int words_num = words.size();
-    for (int i = 0; i < words_num; i++) {
-      string curword = normalize_to_lowerwithdigit(words[i]);
-    }
-    int feats_num = sparse_feats.size();
-    for (int i = 0; i < feats_num; i++) {
-      string curfeat = sparse_feats[i];
-    }
+	for (const string &w : pInstance->m_tweet_words) {
+		words.push_back(&w);
+	}
 
+	for (const string *w : words) {
+		string normalizedWord = normalize_to_lowerwithdigit(*w);
+
+		if (m_word_stats.find(normalizedWord) == m_word_stats.end()) {
+			m_word_stats.insert(std::pair<std::string, int>(normalizedWord, 0));
+		}
+		else {
+			m_word_stats.at(normalizedWord) += 1;
+		}
+	}
 
     if ((numInstance + 1) % m_options.verboseIter == 0) {
       cout << numInstance + 1 << " ";
@@ -60,20 +66,29 @@ int Classifier::createAlphabet(const vector<Instance> &vecInsts) {
 
 int Classifier::addTestAlpha(const vector<Instance> &vecInsts) {
   cout << "Adding word Alphabet..." << endl;
-
   int numInstance;
   for (numInstance = 0; numInstance < vecInsts.size(); numInstance++) {
     const Instance *pInstance = &vecInsts[numInstance];
 
-    const vector<string> &words = pInstance->m_tweet_words;
-    int curInstSize = words.size();
+	vector<const string *> words;
+	for (const string &w : *(pInstance->m_target_words)) {
+		words.push_back(&w);
+	}
 
-    if ((numInstance + 1) % m_options.verboseIter == 0) {
-      cout << numInstance + 1 << " ";
-      if ((numInstance + 1) % (40 * m_options.verboseIter) == 0)
-        cout << std::endl;
-      cout.flush();
-    }
+	for (const string &w : pInstance->m_tweet_words) {
+		words.push_back(&w);
+	}
+
+	for (const string *w : words) {
+		string normalizedWord = normalize_to_lowerwithdigit(*w);
+
+		if (m_word_stats.find(normalizedWord) == m_word_stats.end()) {
+			m_word_stats.insert(std::pair<std::string, int>(normalizedWord, 0));
+		}
+		else {
+			m_word_stats.at(normalizedWord) += 1;
+		}
+	}
 
     if (m_options.maxInstance > 0 && numInstance == m_options.maxInstance)
       break;
@@ -133,7 +148,6 @@ void Classifier::train(const string &trainFile, const string &devFile,
   initialExamples(trainInsts, trainExamples);
   initialExamples(devInsts, devExamples);
   initialExamples(testInsts, testExamples);
-
 
   if (m_options.wordFile != "") {
     m_driver._modelparams.words.initial(&m_driver._modelparams.wordAlpha,
@@ -211,11 +225,11 @@ void Classifier::train(const string &trainFile, const string &devFile,
         string result_label;
         predict(devExamples[idx].m_feature, result_label);
 
-        devInsts[idx].evaluate(result_label, metric_dev);
+        devInsts[idx].evaluate(Stance::NONE, metric_dev); //TODO
 
         if (!m_options.outBest.empty()) {
           curDecodeInst.copyValuesFrom(devInsts[idx]);
-          curDecodeInst.assignLabel(result_label);
+          //curDecodeInst.assignLabel(result_label);
           decodeInstResults.push_back(curDecodeInst);
         }
       }
@@ -228,8 +242,8 @@ void Classifier::train(const string &trainFile, const string &devFile,
       metric_dev.print();
 
       if (!m_options.outBest.empty() && metric_dev.getAccuracy() > bestDIS) {
-        m_pipe.outputAllInstances(devFile + m_options.outBest,
-            decodeInstResults);
+        /*m_pipe.outputAllInstances(devFile + m_options.outBest,
+            decodeInstResults);*/
         bCurIterBetter = true;
       }
 
@@ -242,11 +256,11 @@ void Classifier::train(const string &trainFile, const string &devFile,
 			  string result_label;
 			  predict(testExamples[idx].m_feature, result_label);
 
-			  testInsts[idx].evaluate(result_label, metric_test);
+			  testInsts[idx].evaluate(Stance::NONE, metric_test); // TODO
 
 			  if (bCurIterBetter && !m_options.outBest.empty()) {
 				  curDecodeInst.copyValuesFrom(testInsts[idx]);
-				  curDecodeInst.assignLabel(result_label);
+				  //curDecodeInst.assignLabel(result_label);
 				  decodeInstResults.push_back(curDecodeInst);
 			  }
 		  }
@@ -258,10 +272,10 @@ void Classifier::train(const string &trainFile, const string &devFile,
 		  std::cout << "test:" << std::endl;
 		  metric_test.print();
 
-		  if (!m_options.outBest.empty() && bCurIterBetter) {
+		  /*if (!m_options.outBest.empty() && bCurIterBetter) {
 			  m_pipe.outputAllInstances(testFile + m_options.outBest,
 				  decodeInstResults);
-		  }
+		  }*/
 	  }
 
       if (m_options.saveIntermediate && metric_dev.getAccuracy() > bestDIS) {
@@ -295,8 +309,7 @@ void Classifier::test(const string &testFile, const string &outputFile,
                       const string &modelFile) {
   loadModelFile(modelFile);
   m_driver.TestInitial();
-  vector<Instance> testInsts;
-  m_pipe.readInstances(testFile, testInsts);
+  vector<Instance> testInsts= readInstancesFromFile(testFile);
 
   vector<Example> testExamples;
   initialExamples(testInsts, testExamples);
@@ -308,17 +321,16 @@ void Classifier::test(const string &testFile, const string &outputFile,
   for (int idx = 0; idx < testExamples.size(); idx++) {
     string result_label;
     predict(testExamples[idx].m_feature, result_label);
-    testInsts[idx].evaluate(result_label, metric_test);
+    testInsts[idx].evaluate(Stance::NONE, metric_test); //TODO
     Instance curResultInst;
     curResultInst.copyValuesFrom(testInsts[idx]);
-    curResultInst.assignLabel(result_label);
+    //curResultInst.assignLabel(result_label);
     testInstResults.push_back(curResultInst);
   }
   std::cout << "test:" << std::endl;
   metric_test.print();
 
-  m_pipe.outputAllInstances(outputFile, testInstResults);
-
+  //m_pipe.outputAllInstances(outputFile, testInstResults);
 }
 
 
