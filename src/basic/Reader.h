@@ -67,14 +67,16 @@ vector<string> readLines(const string &fullFileName) {
 void readLineToInstance(const string &line, Instance *instance) {
 	//cout << "Reader readLineToInstance line:" << line << endl;
 	int tailIndex = -1;
+	int i = 0;
 	for (const string &target : getStanceTargets()) {
 		string::size_type index = line.find(target);
 		if (index != string::npos) {
-			instance->m_target = &target;
+			instance->m_target_words = &getStanceTargetWordVectors().at(i);
 			tailIndex = index + target.size();
 			//cout << "Reader readLineToInstance tailIndex:" << tailIndex << endl;
 			break;
 		}
+		++i;
 	}
 
 	if (tailIndex == -1) {
@@ -117,7 +119,7 @@ void readLineToInstance(const string &line, Instance *instance) {
 			words.push_back(word);
 	}
 
-	instance->m_words = move(words);
+	instance->m_tweet_words = move(words);
 }
 
 vector<Instance> readInstancesFromFile(const string &fullFileName) {

@@ -31,7 +31,7 @@ public:
 		split_bychars(strLine1, vecInfo, "\t");
 		m_instance.m_label = vecInfo[0];
 
-		split_bychar(vecInfo[1], m_instance.m_words, ' ');
+		split_bychar(vecInfo[1], m_instance.m_tweet_words, ' ');
 		split_bychar(strLine2, m_instance.m_sparse_feats, ' ');
 		return &m_instance;
 	}

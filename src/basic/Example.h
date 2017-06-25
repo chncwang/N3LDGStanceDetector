@@ -3,18 +3,20 @@
 
 #include <iostream>
 #include <vector>
+#include <string>
 
 using namespace std;
 
 class Feature
 {
 public:
-	vector<string> m_words;
-	vector<string> m_sparse_feats;
+	vector<std::string> m_tweet_words;
+	const vector<std::string> *m_target_words;
+	vector<std::string> m_sparse_feats;
 public:
 	void clear()
 	{
-		m_words.clear();
+		m_tweet_words.clear();
 		m_sparse_feats.clear();
 	}
 };
@@ -23,9 +25,8 @@ class Example
 {
 public:
 	Feature m_feature;
-	vector<dtype> m_label;
+	vector<dtype> m_label; //TODO
 
-public:
 	void clear()
 	{
 		m_feature.clear();

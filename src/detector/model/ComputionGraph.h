@@ -103,12 +103,12 @@ public:
     _pcg->train = bTrain;
     // second step: build graph
     //forward
-    int words_num = feature.m_words.size();
+    int words_num = feature.m_tweet_words.size();
     if (words_num > max_sentence_length)
       words_num = max_sentence_length;
 
     for (int i = 0; i < words_num; i++) {
-      _word_inputs[i].forward(_pcg, feature.m_words[i]);
+      _word_inputs[i].forward(_pcg, feature.m_tweet_words[i]);
     }
 
 	vector<Node *> word_input_ptrs;

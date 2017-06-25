@@ -25,7 +25,7 @@ int Classifier::createAlphabet(const vector<Instance> &vecInsts) {
   for (numInstance = 0; numInstance < vecInsts.size(); numInstance++) {
     const Instance *pInstance = &vecInsts[numInstance];
 
-    const vector<string> &words = pInstance->m_words;
+    const vector<string> &words = pInstance->m_tweet_words;
     const vector<string> &sparse_feats = pInstance->m_sparse_feats;
     const string &label = pInstance->m_label;
 
@@ -33,12 +33,10 @@ int Classifier::createAlphabet(const vector<Instance> &vecInsts) {
     int words_num = words.size();
     for (int i = 0; i < words_num; i++) {
       string curword = normalize_to_lowerwithdigit(words[i]);
-      m_word_stats[curword]++;
     }
     int feats_num = sparse_feats.size();
     for (int i = 0; i < feats_num; i++) {
       string curfeat = sparse_feats[i];
-      m_feat_stats[curfeat]++;
     }
 
 
@@ -55,8 +53,6 @@ int Classifier::createAlphabet(const vector<Instance> &vecInsts) {
   cout << numInstance << " " << endl;
 
   cout << "Label num: " << m_driver._modelparams.labelAlpha.size() << endl;
-  cout << "Sparse Feature num: " << m_feat_stats.size() << endl;
-  cout << "Word num: " << m_word_stats.size() << endl;
   m_driver._modelparams.labelAlpha.set_fixed_flag(true);
 
   return 0;
@@ -69,12 +65,8 @@ int Classifier::addTestAlpha(const vector<Instance> &vecInsts) {
   for (numInstance = 0; numInstance < vecInsts.size(); numInstance++) {
     const Instance *pInstance = &vecInsts[numInstance];
 
-    const vector<string> &words = pInstance->m_words;
+    const vector<string> &words = pInstance->m_tweet_words;
     int curInstSize = words.size();
-    for (int i = 0; i < curInstSize; ++i) {
-      string curword = normalize_to_lowerwithdigit(words[i]);
-      if (!m_options.wordEmbFineTune)m_word_stats[curword]++;
-    }
 
     if ((numInstance + 1) % m_options.verboseIter == 0) {
       cout << numInstance + 1 << " ";
@@ -93,49 +85,29 @@ int Classifier::addTestAlpha(const vector<Instance> &vecInsts) {
 
 
 void Classifier::extractFeature(Feature &feat, const Instance *pInstance) {
-  feat.clear();
-  feat.m_words = pInstance->m_words;
+  feat.m_tweet_words = pInstance->m_tweet_words;
+  feat.m_target_words = pInstance->m_target_words;
   feat.m_sparse_feats = pInstance->m_sparse_feats;
 }
 
 void Classifier::convert2Example(const Instance *pInstance, Example &exam) {
-  exam.clear();
-  const string &orcale = pInstance->m_label;
-  int numLabel = m_driver._modelparams.labelAlpha.size();
-  vector<dtype> curlabels;
-  for (int j = 0; j < numLabel; ++j) {
-    string str = m_driver._modelparams.labelAlpha.from_id(j);
-    if (str.compare(orcale) == 0)
-      curlabels.push_back(1.0);
-    else
-      curlabels.push_back(0.0);
-  }
-
-  exam.m_label = curlabels;
-  Feature feat;
-  extractFeature(feat, pInstance);
-  exam.m_feature = feat;
+	vector<dtype> stanceVector = { 0, 0, 0 };
+	stanceVector.at(pInstance->m_stance) = 1;
+	exam.m_label = stanceVector;
+	Feature feature;
+	extractFeature(feature, pInstance);
+	exam.m_feature = feature;
 }
 
 void Classifier::initialExamples(const vector<Instance> &vecInsts,
                                  vector<Example> &vecExams) {
   int numInstance;
   for (numInstance = 0; numInstance < vecInsts.size(); numInstance++) {
-    const Instance *pInstance = &vecInsts[numInstance];
-    Example curExam;
-    convert2Example(pInstance, curExam);
-    vecExams.push_back(curExam);
-
-    if ((numInstance + 1) % m_options.verboseIter == 0) {
-      cout << numInstance + 1 << " ";
-      if ((numInstance + 1) % (40 * m_options.verboseIter) == 0)
-        cout << std::endl;
-      cout.flush();
-    }
-    if (m_options.maxInstance > 0 && numInstance == m_options.maxInstance)
-      break;
+	  const Instance *pInstance = &vecInsts[numInstance];
+	  Example curExam;
+	  convert2Example(pInstance, curExam);
+	  vecExams.push_back(curExam);
   }
-  cout << numInstance << " " << endl;
 }
 
 void Classifier::train(const string &trainFile, const string &devFile,
@@ -147,13 +119,14 @@ void Classifier::train(const string &trainFile, const string &devFile,
   vector<Instance> trainInsts = readInstancesFromFile(trainFile);
   vector<Instance> devInsts = readInstancesFromFile(devFile);
   vector<Instance> testInsts = readInstancesFromFile(testFile);
-  static vector<Instance> decodeInstResults;
-  static Instance curDecodeInst;
-  bool bCurIterBetter = false;
 
   createAlphabet(trainInsts);
   addTestAlpha(devInsts);
-  addTestAlpha(testInsts);
+  addTestAlpha(devInsts);
+
+  static vector<Instance> decodeInstResults;
+  static Instance curDecodeInst;
+  bool bCurIterBetter = false;
 
   vector<Example> trainExamples, devExamples, testExamples;
 
@@ -161,10 +134,7 @@ void Classifier::train(const string &trainFile, const string &devFile,
   initialExamples(devInsts, devExamples);
   initialExamples(testInsts, testExamples);
 
-  m_word_stats[unknownkey] = m_options.wordCutOff + 1;
-  m_driver._modelparams.wordAlpha.initial(m_word_stats, m_options.wordCutOff);
-  m_feat_stats[unknownkey] = m_options.featCutOff + 1;
-  m_driver._modelparams.featAlpha.initial(m_feat_stats, m_options.featCutOff);
+
   if (m_options.wordFile != "") {
     m_driver._modelparams.words.initial(&m_driver._modelparams.wordAlpha,
         m_options.wordFile, m_options.wordEmbFineTune);
@@ -175,7 +145,6 @@ void Classifier::train(const string &trainFile, const string &devFile,
 
   m_driver._hyperparams.setRequared(m_options);
   m_driver.initial();
-
 
   dtype bestDIS = 0;
 
@@ -264,62 +233,36 @@ void Classifier::train(const string &trainFile, const string &devFile,
         bCurIterBetter = true;
       }
 
-      if (testNum > 0) {
-        auto time_start = std::chrono::high_resolution_clock::now();
-        if (!m_options.outBest.empty())
-          decodeInstResults.clear();
-        metric_test.reset();
-        for (int idx = 0; idx < testExamples.size(); idx++) {
-          string result_label;
-          predict(testExamples[idx].m_feature, result_label);
+	  if (testNum > 0) {
+		  auto time_start = std::chrono::high_resolution_clock::now();
+		  if (!m_options.outBest.empty())
+			  decodeInstResults.clear();
+		  metric_test.reset();
+		  for (int idx = 0; idx < testExamples.size(); idx++) {
+			  string result_label;
+			  predict(testExamples[idx].m_feature, result_label);
 
-          testInsts[idx].evaluate(result_label, metric_test);
+			  testInsts[idx].evaluate(result_label, metric_test);
 
-          if (bCurIterBetter && !m_options.outBest.empty()) {
-            curDecodeInst.copyValuesFrom(testInsts[idx]);
-            curDecodeInst.assignLabel(result_label);
-            decodeInstResults.push_back(curDecodeInst);
-          }
-        }
+			  if (bCurIterBetter && !m_options.outBest.empty()) {
+				  curDecodeInst.copyValuesFrom(testInsts[idx]);
+				  curDecodeInst.assignLabel(result_label);
+				  decodeInstResults.push_back(curDecodeInst);
+			  }
+		  }
 
-        auto time_end = std::chrono::high_resolution_clock::now();
-        std::cout << "Test finished. Total time taken is: "
-                  << std::chrono::duration<double>(
-                      time_end - time_start).count() << "s" << std::endl;
-        std::cout << "test:" << std::endl;
-        metric_test.print();
+		  auto time_end = std::chrono::high_resolution_clock::now();
+		  std::cout << "Test finished. Total time taken is: "
+			  << std::chrono::duration<double>(
+				  time_end - time_start).count() << "s" << std::endl;
+		  std::cout << "test:" << std::endl;
+		  metric_test.print();
 
-        if (!m_options.outBest.empty() && bCurIterBetter) {
-          m_pipe.outputAllInstances(testFile + m_options.outBest,
-              decodeInstResults);
-        }
-      }
-
-      for (int idx = 0; idx < otherExamples.size(); idx++) {
-        std::cout << "processing " << m_options.testFiles[idx] << std::endl;
-        if (!m_options.outBest.empty())
-          decodeInstResults.clear();
-        metric_test.reset();
-        for (int idy = 0; idy < otherExamples[idx].size(); idy++) {
-          string result_label;
-          predict(otherExamples[idx][idy].m_feature, result_label);
-
-          otherInsts[idx][idy].evaluate(result_label, metric_test);
-
-          if (bCurIterBetter && !m_options.outBest.empty()) {
-            curDecodeInst.copyValuesFrom(otherInsts[idx][idy]);
-            curDecodeInst.assignLabel(result_label);
-            decodeInstResults.push_back(curDecodeInst);
-          }
-        }
-        std::cout << "test:" << std::endl;
-        metric_test.print();
-
-        if (!m_options.outBest.empty() && bCurIterBetter) {
-          m_pipe.outputAllInstances(
-              m_options.testFiles[idx] + m_options.outBest, decodeInstResults);
-        }
-      }
+		  if (!m_options.outBest.empty() && bCurIterBetter) {
+			  m_pipe.outputAllInstances(testFile + m_options.outBest,
+				  decodeInstResults);
+		  }
+	  }
 
       if (m_options.saveIntermediate && metric_dev.getAccuracy() > bestDIS) {
         std::cout << "Exceeds best previous performance of " << bestDIS
