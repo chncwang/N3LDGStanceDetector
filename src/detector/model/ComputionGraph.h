@@ -78,6 +78,17 @@ inline void SubGraph::forward(const vector<string> &words)
 	}
 }
 
+class ConditionalEncodingBehavior : public FirstCellNodeBehavior {
+public:
+	void init(int outDim, AlignedMemoryPool *pool = NULL) override {}
+	void forward(Graph *graph) {}
+	Node &getNode() override {
+		return _getNode();
+	}
+
+	std::function<Node&(void)> _getNode;
+};
+
 // Each model consists of two parts, building neural graph and defining output losses.
 class GraphBuilder {
 public:
@@ -108,12 +119,13 @@ public:
   }
 
 public:
-  inline void initial(Graph *pcg, ModelParams &model, HyperParams &opts,
+  void initial(Graph *pcg, ModelParams &model, HyperParams &opts,
                       AlignedMemoryPool *mem = NULL) {
     _graph = pcg;
 	_tweetGraph.initial(pcg, model, opts, mem);
 	_targetGraph.initial(pcg, model, opts, mem);
-
+	_tweetGraph._lstm_builder_left_to_right._firstCellNodeBehavior = std::unique_ptr<ConditionalEncodingBehavior>(new ConditionalEncodingBehavior);
+	_tweetGraph._lstm_builder_right_to_left._firstCellNodeBehavior = std::unique_ptr<ConditionalEncodingBehavior>(new ConditionalEncodingBehavior);
 	_avg_pooling.init(opts.hiddenSize * 2, mem);
 	_max_pooling.init(opts.hiddenSize * 2, mem);
 	_min_pooling.init(opts.hiddenSize * 2, mem);
@@ -126,6 +138,14 @@ public:
   // some nodes may behave different during training and decode, for example, dropout
   inline void forward(const Feature &feature, bool bTrain = false) {
     _graph->train = bTrain;
+
+	static_cast<ConditionalEncodingBehavior *>(_tweetGraph._lstm_builder_left_to_right._firstCellNodeBehavior.get())->_getNode = [&](void) ->Node& {
+		return _targetGraph._lstm_builder_left_to_right._cells.at(feature.m_target_words->size() - 1);
+	};
+
+	static_cast<ConditionalEncodingBehavior *>(_tweetGraph._lstm_builder_right_to_left._firstCellNodeBehavior.get())->_getNode = [&](void) ->Node& {
+		return _targetGraph._lstm_builder_left_to_right._cells.at(0);
+	};
 
 	_tweetGraph.forward(feature.m_tweet_words);
 	_targetGraph.forward(*feature.m_target_words);
