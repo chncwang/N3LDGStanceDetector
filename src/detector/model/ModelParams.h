@@ -2,6 +2,7 @@
 #define SRC_ModelParams_H_
 #include "HyperParams.h"
 #include "LSTM.h"
+#include "MySoftMaxLoss.h"
 
 // Each model consists of two parts, building neural graph and defining output losses.
 class ModelParams{
@@ -15,7 +16,7 @@ public:
 	LSTMParams tweet_left_to_right_lstm_params;
 	LSTMParams tweet_right_to_left_lstm_params;
 public:
-	SoftMaxLoss loss;
+	MySoftMaxLoss loss;
 
 
 public:

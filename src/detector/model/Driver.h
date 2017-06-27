@@ -11,7 +11,7 @@
 #include <iostream>
 #include "ComputionGraph.h"
 #include "Stance.h"
-
+#include "MySoftMaxLoss.h"
 
 //A native neural network classfier using only word embeddings
 
@@ -31,7 +31,8 @@ public:
   ModelParams _modelparams;  // model parameters
   HyperParams _hyperparams;
 
-  Metric _eval;
+  Metric _favor_metric;
+  Metric _against_metric;
   CheckGrad _checkgrad;
   ModelUpdate _ada;  // model update
   AlignedMemoryPool _aligned_mem;
@@ -96,7 +97,7 @@ public:
 
 
   inline dtype train(const vector<Example> &examples, int iter) {
-    _eval.reset();
+	  resetEval();
     _cg.clearValue();
     int example_num = examples.size();
     if (example_num > _builders.size()) {
@@ -119,13 +120,9 @@ public:
     for (int count = 0; count < example_num; count++) {
       const Example &example = examples[count];
       cost += _modelparams.loss.loss(&_builders[count]._neural_output,
-          example.m_label, _eval, example_num);
+          example.m_label, _favor_metric, _against_metric, example_num);
     }
     _cg.backward();
-
-    if (_eval.getAccuracy() < 0) {
-      std::cout << "strange" << std::endl;
-    }
 
     return cost;
   }
@@ -164,14 +161,10 @@ public:
     _checkgrad.check(this, examples, out.str());
   }
 
-  void writeModel();
-
-  void loadModel();
-
-
 private:
   inline void resetEval() {
-    _eval.reset();
+	  _favor_metric.reset();
+	  _against_metric.reset();
   }
 
 

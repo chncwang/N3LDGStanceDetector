@@ -171,7 +171,6 @@ void Classifier::train(const string &trainFile, const string &devFile,
   for (int i = 0; i < inputSize; ++i)
     indexes.push_back(i);
 
-  static Metric eval, metric_dev, metric_test;
   static vector<Example> subExamples;
   int devNum = devExamples.size(), testNum = testExamples.size();
   int non_exceeds_time = 0;
@@ -179,7 +178,7 @@ void Classifier::train(const string &trainFile, const string &devFile,
     std::cout << "##### Iteration " << iter << std::endl;
 
     random_shuffle(indexes.begin(), indexes.end());
-    eval.reset();
+	Metric favorMetric, againstMetric;
     auto time_start = std::chrono::high_resolution_clock::now();
     for (int updateIter = 0; updateIter < batchBlock; updateIter++) {
       subExamples.clear();
@@ -195,10 +194,22 @@ void Classifier::train(const string &trainFile, const string &devFile,
       int curUpdateIter = iter * batchBlock + updateIter;
       dtype cost = m_driver.train(subExamples, curUpdateIter);
 
-      eval.overall_label_count += m_driver._eval.overall_label_count;
-      eval.correct_label_count += m_driver._eval.correct_label_count;
+      favorMetric.overall_label_count += m_driver._favor_metric.overall_label_count;
+      favorMetric.correct_label_count += m_driver._favor_metric.correct_label_count;
+	  favorMetric.predicated_label_count += m_driver._favor_metric.predicated_label_count;
+	  againstMetric.overall_label_count += m_driver._against_metric.overall_label_count;
+	  againstMetric.correct_label_count += m_driver._against_metric.correct_label_count;
+	  againstMetric.predicated_label_count += m_driver._against_metric.predicated_label_count;
       m_driver.updateModel();
 	
+	  if (updateIter % 100 == 0) {
+		  std::cout << "current: " << updateIter + 1 << ", total block: "
+			  << batchBlock << std::endl;
+		  std::cout << "favor:" << std::endl;
+		  favorMetric.print();
+		  std::cout << "against:" << std::endl;
+		  againstMetric.print();
+	  }
     }
     auto time_end = std::chrono::high_resolution_clock::now();
     std::cout << "Train finished. Total time taken is: "
@@ -206,15 +217,15 @@ void Classifier::train(const string &trainFile, const string &devFile,
               << "s" << std::endl;
 
     if (devNum > 0) {
+		Metric favor, against;
       auto time_start = std::chrono::high_resolution_clock::now();
       bCurIterBetter = false;
       if (!m_options.outBest.empty())
         decodeInstResults.clear();
-      metric_dev.reset();
       for (int idx = 0; idx < devExamples.size(); idx++) {
         Stance result = predict(devExamples[idx].m_feature);
 
-        devInsts[idx].evaluate(result, metric_dev);
+        devInsts[idx].evaluate(result, favor, against);
 
         if (!m_options.outBest.empty()) {
           curDecodeInst.copyValuesFrom(devInsts[idx]);
@@ -228,9 +239,12 @@ void Classifier::train(const string &trainFile, const string &devFile,
                 << std::chrono::duration<double>(time_end - time_start).count()
                 << "s" << std::endl;
       std::cout << "dev:" << std::endl;
-      metric_dev.print();
+	  std::cout << "favor:" << std::endl;
+      favor.print();
+	  std::cout << "against:" << std::endl;
+	  against.print();
 
-      if (!m_options.outBest.empty() && metric_dev.getAccuracy() > bestDIS) {
+      if (!m_options.outBest.empty()  > bestDIS) {
         /*m_pipe.outputAllInstances(devFile + m_options.outBest,
             decodeInstResults);*/
         bCurIterBetter = true;
@@ -240,11 +254,11 @@ void Classifier::train(const string &trainFile, const string &devFile,
 		  auto time_start = std::chrono::high_resolution_clock::now();
 		  if (!m_options.outBest.empty())
 			  decodeInstResults.clear();
-		  metric_test.reset();
+		  Metric favor, against;
 		  for (int idx = 0; idx < testExamples.size(); idx++) {
 			  Stance stance = predict(testExamples[idx].m_feature);
 
-			  testInsts[idx].evaluate(stance, metric_test);
+			  testInsts[idx].evaluate(stance, favor, against);
 
 			  if (bCurIterBetter && !m_options.outBest.empty()) {
 				  curDecodeInst.copyValuesFrom(testInsts[idx]);
@@ -258,7 +272,11 @@ void Classifier::train(const string &trainFile, const string &devFile,
 			  << std::chrono::duration<double>(
 				  time_end - time_start).count() << "s" << std::endl;
 		  std::cout << "test:" << std::endl;
-		  metric_test.print();
+		  std::cout << "favor:" << std::endl;
+		  favor.print();
+		  std::cout << "against:" << std::endl;
+		  against.print();
+		  std::cout << "avg f:" << (favor.getFMeasure() + against.getFMeasure()) * 0.5 << std::endl;
 
 		  /*if (!m_options.outBest.empty() && bCurIterBetter) {
 			  m_pipe.outputAllInstances(testFile + m_options.outBest,
@@ -266,11 +284,12 @@ void Classifier::train(const string &trainFile, const string &devFile,
 		  }*/
 	  }
 
-      if (m_options.saveIntermediate && metric_dev.getAccuracy() > bestDIS) {
+	  double avgFMeasure = (favor.getFMeasure() + against.getFMeasure()) * 0.5;
+      if (m_options.saveIntermediate && avgFMeasure > bestDIS) {
         std::cout << "Exceeds best previous performance of " << bestDIS
                   << ". Saving model file.." << std::endl;
         non_exceeds_time = 0;
-        bestDIS = metric_dev.getAccuracy();
+		bestDIS = avgFMeasure;
         writeModelFile(modelFile);
       } else if (++non_exceeds_time > 10) {
         std::cout << "iter:" << iter << std::endl;
@@ -299,18 +318,20 @@ void Classifier::test(const string &testFile, const string &outputFile,
 
   int testNum = testExamples.size();
   vector<Instance> testInstResults;
-  Metric metric_test;
-  metric_test.reset();
+  Metric favor, against;
   for (int idx = 0; idx < testExamples.size(); idx++) {
     Stance stance = predict(testExamples[idx].m_feature);
-    testInsts[idx].evaluate(stance, metric_test);
+    testInsts[idx].evaluate(stance, favor, against);
     Instance curResultInst;
     curResultInst.copyValuesFrom(testInsts[idx]);
     //curResultInst.assignLabel(result_label);
     testInstResults.push_back(curResultInst);
   }
   std::cout << "test:" << std::endl;
-  metric_test.print();
+  std::cout << "favor:" << std::endl;
+  favor.print();
+  std::cout << "against:" << std::endl;
+  against.print();
 
   //m_pipe.outputAllInstances(outputFile, testInstResults);
 }

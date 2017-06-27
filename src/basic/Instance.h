@@ -16,12 +16,26 @@ public:
 		m_sparse_feats.clear();
 	}
 
-	void evaluate(Stance predict_stance, Metric& eval) const
+	void evaluate(Stance predict_stance, Metric& favorMetric, Metric &againstMetric) const
 	{
-		if (predict_stance == m_stance) {
-			eval.correct_label_count++;
+		if (m_stance == Stance::FAVOR) {
+			favorMetric.overall_label_count++;
 		}
-		eval.overall_label_count++;
+		else if (m_stance == Stance::AGAINST) {
+			againstMetric.overall_label_count++;
+		}
+
+		if (predict_stance == Stance::FAVOR) {
+			favorMetric.predicated_label_count++;
+			if (m_stance == Stance::FAVOR) {
+				favorMetric.correct_label_count++;
+			}
+		} else if (predict_stance == Stance::AGAINST) {
+			againstMetric.predicated_label_count++;
+			if (m_stance == Stance::AGAINST) {
+				againstMetric.correct_label_count++;
+			}
+		}
 	}
 
 	void copyValuesFrom(const Instance& anInstance)
