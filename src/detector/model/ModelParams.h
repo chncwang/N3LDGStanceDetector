@@ -15,7 +15,6 @@ public:
 	LSTMParams tweet_left_to_right_lstm_params;
 	LSTMParams tweet_right_to_left_lstm_params;
 public:
-	Alphabet labelAlpha; // should be initialized outside
 	SoftMaxLoss loss;
 
 
@@ -23,13 +22,14 @@ public:
 	bool initial(HyperParams& opts, AlignedMemoryPool* mem = NULL){
 
 		// some model parameters should be initialized outside
-		if (words.nVSize <= 0 || labelAlpha.size() <= 0){
-			return false;
+		if (words.nVSize <= 0){
+			std::cout << "ModelParam initial - words.nVSize:" << words.nVSize << std::endl;
+			abort();
 		}
 		opts.wordDim = words.nDim;
 		opts.wordWindow = opts.wordContext * 2 + 1;
 		opts.windowOutput = opts.wordDim * opts.wordWindow;
-		opts.labelSize = labelAlpha.size();
+		opts.labelSize = 3;
 		hidden_linear.initial(opts.hiddenSize, opts.windowOutput, true, mem);
 		opts.inputSize = opts.hiddenSize * 6;
 		olayer_linear.initial(opts.labelSize, opts.inputSize, false, mem);
@@ -41,13 +41,13 @@ public:
 	bool TestInitial(HyperParams& opts, AlignedMemoryPool* mem = NULL){
 
 		// some model parameters should be initialized outside
-		if (words.nVSize <= 0 || labelAlpha.size() <= 0){
+		if (words.nVSize <= 0 ){
 			return false;
 		}
 		opts.wordDim = words.nDim;
 		opts.wordWindow = opts.wordContext * 2 + 1;
 		opts.windowOutput = opts.wordDim * opts.wordWindow;
-		opts.labelSize = labelAlpha.size();
+		opts.labelSize = 3;
 		opts.inputSize = opts.hiddenSize * 3;
 		return true;
 	}
@@ -89,7 +89,6 @@ public:
 		words.save(os);
 		hidden_linear.save(os);
 		olayer_linear.save(os);
-		labelAlpha.write(os);
 	}
 
 	void loadModel(std::ifstream &is, AlignedMemoryPool* mem = NULL){
@@ -97,7 +96,6 @@ public:
 		words.load(is, &wordAlpha, mem);
 		hidden_linear.load(is, mem);
 		olayer_linear.load(is, mem);
-		labelAlpha.read(is);
 	}
 
 };

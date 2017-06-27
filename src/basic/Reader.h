@@ -88,13 +88,15 @@ void readLineToInstance(const string &line, Instance *instance) {
 	for (int i = 0; i < 3; ++i) {
 		Stance stance = static_cast<Stance>(i);
 		const string &stanceStr = StanceToString(stance);
-
-		index = line.find_last_of(stanceStr);
-		if (index != string::npos) {
-			//cout << "Reader readLineToInstance index:" << index << endl;
+		std::regex regex(stanceStr + "\s*$");
+		for (auto it = std::sregex_iterator(line.begin(), line.end(), regex);
+			it != std::sregex_iterator();
+			++it)
+		{
+			index = it->position();
 			instance->m_stance = stance;
+			break;
 		}
-		break;
 	}
 
 	string substring = line.substr(tailIndex, index - tailIndex);
@@ -118,7 +120,7 @@ void readLineToInstance(const string &line, Instance *instance) {
 		boost::erase_all(word, "#");
 			words.push_back(word);
 	}
-
+	//std::cout << instance->m_stance << std::endl;
 	instance->m_tweet_words = move(words);
 }
 

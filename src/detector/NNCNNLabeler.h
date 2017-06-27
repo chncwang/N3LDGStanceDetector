@@ -33,7 +33,7 @@ public:
 	void initialExamples(const vector<Instance>& vecInsts, vector<Example>& vecExams);
 
 	void train(const string& trainFile, const string& devFile, const string& testFile, const string& modelFile, const string& optionFile);
-	int predict(const Feature& feature, string& output);
+	Stance predict(const Feature& feature);
 	void test(const string& testFile, const string& outputFile, const string& modelFile);
 
 	void writeModelFile(const string& outputModelFile);

@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include "ComputionGraph.h"
+#include "Stance.h"
 
 
 //A native neural network classfier using only word embeddings
@@ -42,12 +43,12 @@ public:
     if (!_hyperparams.bValid()) {
       std::cout << "hyper parameter initialization Error, Please check!"
                 << std::endl;
-      return;
+      abort();
     }
     if (!_modelparams.initial(_hyperparams, &_aligned_mem)) {
       std::cout << "model parameter initialization Error, Please check!"
                 << std::endl;
-      return;
+      abort();
     }
     _modelparams.exportModelParams(_ada);
     _modelparams.exportCheckGradParams(_checkgrad);
@@ -99,9 +100,9 @@ public:
     _cg.clearValue();
     int example_num = examples.size();
     if (example_num > _builders.size()) {
-      std::cout << "input example number larger than predefined batch number"
-                << std::endl;
-      return 1000;
+      std::cout << "Driver train - input example number larger than predefined batch number example_num:" << example_num
+                << " _builders.size():" << _builders.size() << std::endl;
+	  abort();
     }
 
     dtype cost = 0.0;
@@ -129,12 +130,15 @@ public:
     return cost;
   }
 
-  inline void predict(const Feature &feature, int &result) {
+  inline void predict(const Feature &feature, Stance &result) {
     _cg.clearValue();
     _builders[0].forward(feature);
     _cg.compute();
 
-    _modelparams.loss.predict(&_builders[0]._neural_output, result);
+	int intResult;
+    _modelparams.loss.predict(&_builders[0]._neural_output, intResult);
+
+	result = static_cast<Stance>(intResult);
   }
 
   inline dtype cost(const Example &example) {

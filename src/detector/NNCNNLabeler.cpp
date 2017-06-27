@@ -17,11 +17,9 @@ int Classifier::createAlphabet(const vector<Instance> &vecInsts) {
     std::cout << "training set empty" << std::endl;
     return -1;
   }
-  cout << "Creating Alphabet..." << endl;
+  std::cout << "Creating Alphabet..." << endl;
 
   int numInstance;
-
-  m_driver._modelparams.labelAlpha.clear();
 
   for (numInstance = 0; numInstance < vecInsts.size(); numInstance++) {
     const Instance *pInstance = &vecInsts[numInstance];
@@ -56,16 +54,13 @@ int Classifier::createAlphabet(const vector<Instance> &vecInsts) {
     if (m_options.maxInstance > 0 && numInstance == m_options.maxInstance)
       break;
   }
-  cout << numInstance << " " << endl;
-
-  cout << "Label num: " << m_driver._modelparams.labelAlpha.size() << endl;
-  m_driver._modelparams.labelAlpha.set_fixed_flag(true);
+  std::cout << numInstance << " " << endl;
 
   return 0;
 }
 
 int Classifier::addTestAlpha(const vector<Instance> &vecInsts) {
-  cout << "Adding word Alphabet..." << endl;
+  std::cout << "Adding word Alphabet..." << endl;
   int numInstance;
   for (numInstance = 0; numInstance < vecInsts.size(); numInstance++) {
     const Instance *pInstance = &vecInsts[numInstance];
@@ -149,6 +144,9 @@ void Classifier::train(const string &trainFile, const string &devFile,
   initialExamples(devInsts, devExamples);
   initialExamples(testInsts, testExamples);
 
+  m_word_stats[unknownkey] = m_options.wordCutOff + 1;
+  m_driver._modelparams.wordAlpha.initial(m_word_stats, m_options.wordCutOff);
+
   if (m_options.wordFile != "") {
     m_driver._modelparams.words.initial(&m_driver._modelparams.wordAlpha,
         m_options.wordFile, m_options.wordEmbFineTune);
@@ -199,14 +197,6 @@ void Classifier::train(const string &trainFile, const string &devFile,
 
       eval.overall_label_count += m_driver._eval.overall_label_count;
       eval.correct_label_count += m_driver._eval.correct_label_count;
-
-//      if ((curUpdateIter + 1) % m_options.verboseIter == 0) {
-//        m_driver.checkgrad(subExamples, curUpdateIter + 1);
-//        std::cout << "current: " << updateIter + 1 << ", total block: "
-//                  << batchBlock << std::endl;
-//        std::cout << "Cost = " << cost << ", Tag Correct(%) = "
-//                  << eval.getAccuracy() << std::endl;
-//      }
       m_driver.updateModel();
 	
     }
@@ -222,10 +212,9 @@ void Classifier::train(const string &trainFile, const string &devFile,
         decodeInstResults.clear();
       metric_dev.reset();
       for (int idx = 0; idx < devExamples.size(); idx++) {
-        string result_label;
-        predict(devExamples[idx].m_feature, result_label);
+        Stance result = predict(devExamples[idx].m_feature);
 
-        devInsts[idx].evaluate(Stance::NONE, metric_dev); //TODO
+        devInsts[idx].evaluate(result, metric_dev);
 
         if (!m_options.outBest.empty()) {
           curDecodeInst.copyValuesFrom(devInsts[idx]);
@@ -253,10 +242,9 @@ void Classifier::train(const string &trainFile, const string &devFile,
 			  decodeInstResults.clear();
 		  metric_test.reset();
 		  for (int idx = 0; idx < testExamples.size(); idx++) {
-			  string result_label;
-			  predict(testExamples[idx].m_feature, result_label);
+			  Stance stance = predict(testExamples[idx].m_feature);
 
-			  testInsts[idx].evaluate(Stance::NONE, metric_test); // TODO
+			  testInsts[idx].evaluate(stance, metric_test);
 
 			  if (bCurIterBetter && !m_options.outBest.empty()) {
 				  curDecodeInst.copyValuesFrom(testInsts[idx]);
@@ -293,16 +281,11 @@ void Classifier::train(const string &trainFile, const string &devFile,
   }
 }
 
-int Classifier::predict(const Feature &feature, string &output) {
+Stance Classifier::predict(const Feature &feature) {
   //assert(features.size() == words.size());
-  int labelIdx;
-  m_driver.predict(feature, labelIdx);
-  output = m_driver._modelparams.labelAlpha.from_id(labelIdx, unknownkey);
-
-  if (output == nullkey) {
-    std::cout << "predict error" << std::endl;
-  }
-  return 0;
+	Stance stance;
+  m_driver.predict(feature, stance);
+  return stance;
 }
 
 void Classifier::test(const string &testFile, const string &outputFile,
@@ -319,9 +302,8 @@ void Classifier::test(const string &testFile, const string &outputFile,
   Metric metric_test;
   metric_test.reset();
   for (int idx = 0; idx < testExamples.size(); idx++) {
-    string result_label;
-    predict(testExamples[idx].m_feature, result_label);
-    testInsts[idx].evaluate(Stance::NONE, metric_test); //TODO
+    Stance stance = predict(testExamples[idx].m_feature);
+    testInsts[idx].evaluate(stance, metric_test);
     Instance curResultInst;
     curResultInst.copyValuesFrom(testInsts[idx]);
     //curResultInst.assignLabel(result_label);
@@ -341,7 +323,7 @@ void Classifier::loadModelFile(const string &inputModelFile) {
     m_driver._modelparams.loadModel(is, &m_driver._aligned_mem);
     is.close();
   } else
-    cout << "load model error" << endl;
+    std::cout << "load model error" << endl;
 }
 
 void Classifier::writeModelFile(const string &outputModelFile) {
@@ -350,9 +332,9 @@ void Classifier::writeModelFile(const string &outputModelFile) {
     m_driver._hyperparams.saveModel(os);
     m_driver._modelparams.saveModel(os);
     os.close();
-    cout << "write model ok. " << endl;
+    std::cout << "write model ok. " << endl;
   } else
-    cout << "open output file error" << endl;
+    std::cout << "open output file error" << endl;
 }
 
 #include "Targets.h"
