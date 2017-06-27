@@ -292,8 +292,7 @@ void Classifier::train(const string &trainFile, const string &devFile,
 		bestDIS = avgFMeasure;
         writeModelFile(modelFile);
       } else if (++non_exceeds_time > 10) {
-        std::cout << "iter:" << iter << std::endl;
-        break;
+        std::cout << "iter:" << iter << " maybe reached best" << std::endl;
       }
     }
     // Clear gradients
