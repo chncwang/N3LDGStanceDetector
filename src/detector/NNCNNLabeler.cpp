@@ -363,8 +363,11 @@ void Classifier::writeModelFile(const string &outputModelFile) {
 //	vector<Instance> instances = readInstancesFromFile("C:/data/stance_data/semeval2016-task6-trainingdata.txt");
 //
 //	for (Instance &ins : instances) {
-//		std::cout << ins.m_stance << " " << *ins.m_target << endl;
-//		for (string &w : ins.m_words) {
+//		for (const string &w : *ins.m_target_words) {
+//			std::cout << w << " ";
+//		}
+//		std::cout << std::endl;
+//		for (string &w : ins.m_tweet_words) {
 //			std::cout << w << "|";
 //		}
 //		std::cout << std::endl;

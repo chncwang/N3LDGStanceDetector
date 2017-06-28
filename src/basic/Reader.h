@@ -102,18 +102,19 @@ void readLineToInstance(const string &line, Instance *instance) {
 	string substring = line.substr(tailIndex, index - tailIndex);
 	//std::cout << "Reader readLineToInstance substring:" << substring << endl;
 	
-	std::regex regex("[\s\t]+(.+)#SemST.*");
-	std::smatch matcher;
-	if (!std::regex_search(substring, matcher, regex)) {
-		//std::cout << "Reader readLineToInstance regex not found!" << endl;
-		assert(false);
-	}
+	//std::regex regex("[\s\t]+(.+)");
+	//std::smatch matcher;
+	//if (!std::regex_search(substring, matcher, regex)) {
+	//	//std::cout << "Reader readLineToInstance regex not found!" << endl;
+	//	std::cout << "substring:" << substring << std::endl;
+	//	assert(false);
+	//}
 
-	string sentence = matcher.format("$1");
+	//string sentence = matcher.format("$1");
 	//std::cout << "Reader readLineToInstance sentence:" << sentence << "|||" << endl;
 
 	vector<string> rawwords;
-	boost::split(rawwords, sentence, boost::is_any_of(" "));
+	boost::split(rawwords, substring, boost::is_any_of(" "));
 	vector<string> words;
 	for (string & word : rawwords) {
 		if (word.empty()) continue;
