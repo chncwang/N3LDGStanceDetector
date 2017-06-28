@@ -3,7 +3,6 @@ PROJECT(N3LDGStanceDetector)
 
 SET(CMAKE_CXX_COMPILER c++)
 
-add_compile_options(/wd4018 /wd4819 /wd4996)
 
 SET(SRC_DIR src)
 
