@@ -132,7 +132,7 @@ void Classifier::train(const string &trainFile, const string &devFile,
 
   createAlphabet(trainInsts);
   addTestAlpha(devInsts);
-  addTestAlpha(devInsts);
+  addTestAlpha(testInsts);
 
   static vector<Instance> decodeInstResults;
   static Instance curDecodeInst;
