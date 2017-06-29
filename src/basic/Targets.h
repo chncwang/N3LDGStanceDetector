@@ -6,7 +6,7 @@
 #include <boost/algorithm/string.hpp>
 
 const std::vector<string> &getStanceTargets() {
-	static std::vector<std::string> targets = {"Atheism", "Climate Change is a Real Concern", "Feminist Movement", "Hillary Clinton", "Legalization of Abortion"};
+	static std::vector<std::string> targets = {"Atheism", "Climate Change is a Real Concern", "Feminist Movement", "Hillary Clinton", "Legalization of Abortion", "Donald Trump"};
 	return targets;
 }
 
