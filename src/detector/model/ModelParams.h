@@ -32,7 +32,7 @@ public:
 		opts.windowOutput = opts.wordDim * opts.wordWindow;
 		opts.labelSize = 3;
 		hidden_linear.initial(opts.hiddenSize, opts.windowOutput, true, mem);
-		opts.inputSize = opts.hiddenSize * 6;
+		opts.inputSize = opts.hiddenSize * 2;
 		olayer_linear.initial(opts.labelSize, opts.inputSize, false, mem);
 		tweet_left_to_right_lstm_params.initial(opts.hiddenSize, opts.windowOutput, mem);
 		tweet_right_to_left_lstm_params.initial(opts.hiddenSize, opts.windowOutput, mem);
