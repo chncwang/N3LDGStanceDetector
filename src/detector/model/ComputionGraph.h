@@ -12,13 +12,11 @@ public:
 	LSTMBuilder _lstm_builder_left_to_right;
 	LSTMBuilder _lstm_builder_right_to_left;
 
-	std::vector<ConcatNode> _lstm_concat_nodes;
-
 	Graph *_graph;
 
 	void createNodes(int length);
 	void initial(Graph *pcg, ModelParams &model, HyperParams &opts,
-		AlignedMemoryPool *mem = NULL);
+		AlignedMemoryPool *mem = NULL, const string &tag = "");
 	void forward(const vector<string> &words);
 };
 
@@ -27,24 +25,19 @@ void SubGraph::createNodes(int length) {
 	_word_window.resize(length);
 	_lstm_builder_left_to_right.resize(length);
 	_lstm_builder_right_to_left.resize(length);
-	_lstm_concat_nodes.resize(length);
 }
 
-inline void SubGraph::initial(Graph * pcg, ModelParams & model, HyperParams & opts, AlignedMemoryPool * mem)
+inline void SubGraph::initial(Graph * pcg, ModelParams & model, HyperParams & opts, AlignedMemoryPool * mem, const string &tag)
 {
 	_graph = pcg;
 	for (int idx = 0; idx < _word_inputs.size(); idx++) {
 		_word_inputs[idx].setParam(&model.words);
 		_word_inputs[idx].init(opts.wordDim, mem);
 	}
-	_lstm_builder_left_to_right.init(&model.tweet_left_to_right_lstm_params, 0.0, true, mem);
-	_lstm_builder_right_to_left.init(&model.tweet_left_to_right_lstm_params, 0.0, false, mem);
+	_lstm_builder_left_to_right.init(&model.tweet_left_to_right_lstm_params, 0.0, true, mem, tag);
+	_lstm_builder_right_to_left.init(&model.tweet_left_to_right_lstm_params, 0.0, false, mem, tag);
 
 	_word_window.init(opts.wordDim, opts.wordContext, mem);
-
-	for (ConcatNode &n : _lstm_concat_nodes) {
-		n.init(opts.hiddenSize * 2, mem);
-	}
 }
 
 void SubGraph::forward(const vector<string> &words)
@@ -75,10 +68,6 @@ void SubGraph::forward(const vector<string> &words)
 	_lstm_builder_left_to_right.forward(_graph, word_window_outputs_ptrs, words_num);
 	_lstm_builder_right_to_left._shouldLeftToRight = false;
 	_lstm_builder_right_to_left.forward(_graph, word_window_outputs_ptrs, words_num);
-
-	for (int i = 0; i < words_num; ++i) {
-		_lstm_concat_nodes.at(i).forward(_graph, &_lstm_builder_left_to_right._hiddens.at(i), &_lstm_builder_right_to_left._hiddens.at(i));
-	}
 }
 
 class ConditionalEncodingBehavior : public FirstCellNodeBehavior {
@@ -98,11 +87,7 @@ public:
 	SubGraph _tweetGraph;
 	SubGraph _targetGraph;
 
-	AvgPoolNode _avg_pooling;
-	MaxPoolNode _max_pooling;
-	MinPoolNode _min_pooling;
-
-	ConcatNode _pooling_concat_node;
+	ConcatNode _concatNode;
 	LinearNode _neural_output;
 
   Graph *_graph;
@@ -115,24 +100,17 @@ public:
 	  _targetGraph.createNodes(length_upper_bound);
 
 	  int doubleLength = length_upper_bound * 2;
-
-	  _avg_pooling.setParam(doubleLength);
-	  _max_pooling.setParam(doubleLength);
-	  _min_pooling.setParam(doubleLength);
   }
 
 public:
   void initial(Graph *pcg, ModelParams &model, HyperParams &opts,
                       AlignedMemoryPool *mem = NULL) {
     _graph = pcg;
-	_tweetGraph.initial(pcg, model, opts, mem);
-	_targetGraph.initial(pcg, model, opts, mem);
+	_tweetGraph.initial(pcg, model, opts, mem, "tweet");
+	_targetGraph.initial(pcg, model, opts, mem, "target");
 	_tweetGraph._lstm_builder_left_to_right._firstCellNodeBehavior = std::unique_ptr<ConditionalEncodingBehavior>(new ConditionalEncodingBehavior);
 	_tweetGraph._lstm_builder_right_to_left._firstCellNodeBehavior = std::unique_ptr<ConditionalEncodingBehavior>(new ConditionalEncodingBehavior);
-	_avg_pooling.init(opts.hiddenSize * 2, mem);
-	_max_pooling.init(opts.hiddenSize * 2, mem);
-	_min_pooling.init(opts.hiddenSize * 2, mem);
-	_pooling_concat_node.init(opts.hiddenSize * 6, mem);
+	_concatNode.init(opts.hiddenSize * 2, mem);
 	_neural_output.setParam(&model.olayer_linear);
 	_neural_output.init(opts.labelSize, mem);
   }
@@ -153,15 +131,8 @@ public:
 	_tweetGraph.forward(feature.m_tweet_words);
 	_targetGraph.forward(feature.m_target_words);
 
-	int words_num = feature.m_tweet_words.size();
-	_avg_pooling.forward(_graph,
-		getPNodes(_tweetGraph._lstm_concat_nodes, words_num));
-	_max_pooling.forward(_graph,
-		getPNodes(_tweetGraph._lstm_concat_nodes, words_num));
-	_min_pooling.forward(_graph,
-		getPNodes(_tweetGraph._lstm_concat_nodes, words_num));
-	_pooling_concat_node.forward(_graph, &_avg_pooling, &_max_pooling, &_min_pooling);
-	_neural_output.forward(_graph, &_pooling_concat_node);
+	_concatNode.forward(_graph, &_tweetGraph._lstm_builder_left_to_right._hiddens.at(feature.m_tweet_words.size() - 1), &_tweetGraph._lstm_builder_right_to_left._hiddens.at(0));
+	_neural_output.forward(_graph, &_concatNode);
   }
 };
 
