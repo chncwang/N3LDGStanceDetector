@@ -126,7 +126,16 @@ void Classifier::train(const string &trainFile, const string &devFile,
   if (optionFile != "")
     m_options.load(optionFile);
   m_options.showOptions();
-  vector<Instance> trainInsts = readInstancesFromFile(trainFile);
+
+  vector<Instance> rawtrainInsts = readInstancesFromFile(trainFile);
+  vector<Instance> trainInsts;
+  for (Instance &ins : rawtrainInsts) {
+	  if (ins.m_target_words.at(0) == "Hillary") {
+		  continue;
+	  }
+	  trainInsts.push_back(ins);
+  }
+
   vector<Instance> devInsts = readInstancesFromFile(devFile);
   vector<Instance> testInsts = readInstancesFromFile(testFile);
 

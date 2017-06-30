@@ -147,7 +147,7 @@ public:
 	};
 
 	static_cast<ConditionalEncodingBehavior *>(_tweetGraph._lstm_builder_right_to_left._firstCellNodeBehavior.get())->_getNode = [&](void) ->Node& {
-		return _targetGraph._lstm_builder_left_to_right._cells.at(0);
+		return _targetGraph._lstm_builder_right_to_left._cells.at(0);
 	};
 
 	_tweetGraph.forward(feature.m_tweet_words);
