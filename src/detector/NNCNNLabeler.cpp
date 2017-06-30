@@ -25,7 +25,7 @@ int Classifier::createAlphabet(const vector<Instance> &vecInsts) {
     const Instance *pInstance = &vecInsts[numInstance];
 
     vector<const string *> words;
-	for (const string &w : *(pInstance->m_target_words)) {
+	for (const string &w : pInstance->m_target_words) {
 		words.push_back(&w);
 	}
 
@@ -66,7 +66,7 @@ int Classifier::addTestAlpha(const vector<Instance> &vecInsts) {
     const Instance *pInstance = &vecInsts[numInstance];
 
 	vector<const string *> words;
-	for (const string &w : *(pInstance->m_target_words)) {
+	for (const string &w : pInstance->m_target_words) {
 		words.push_back(&w);
 	}
 
@@ -360,10 +360,10 @@ void Classifier::writeModelFile(const string &outputModelFile) {
 #include "Targets.h"
 
 //int main(int argc, char *argv[]) {
-//	vector<Instance> instances = readInstancesFromFile("C:/data/stance_data/semeval2016-task6-trainingdata.txt");
+//	vector<Instance> instances = readInstancesFromFile("C:/N3LDGStanceDetector/data/SemEval2016-Task6-subtaskB-testdata-gold.txt");
 //
 //	for (Instance &ins : instances) {
-//		for (const string &w : *ins.m_target_words) {
+//		for (const string &w : ins.m_target_words) {
 //			std::cout << w << " ";
 //		}
 //		std::cout << std::endl;

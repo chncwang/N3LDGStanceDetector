@@ -68,10 +68,11 @@ void readLineToInstance(const string &line, Instance *instance) {
 	//cout << "Reader readLineToInstance line:" << line << endl;
 	int tailIndex = -1;
 	int i = 0;
+	auto targetWordVectors = getStanceTargetWordVectors();
 	for (const string &target : getStanceTargets()) {
 		string::size_type index = line.find(target);
-		if (index != string::npos) {
-			instance->m_target_words = &getStanceTargetWordVectors().at(i);
+		if (index == 0) {
+			instance->m_target_words = targetWordVectors.at(i);
 			tailIndex = index + target.size();
 			//cout << "Reader readLineToInstance tailIndex:" << tailIndex << endl;
 			break;
@@ -121,6 +122,9 @@ void readLineToInstance(const string &line, Instance *instance) {
 		boost::erase_all(word, "#");
 			words.push_back(word);
 	}
+
+	assert(!words.empty());
+
 	//std::cout << instance->m_stance << std::endl;
 	instance->m_tweet_words = move(words);
 }
@@ -130,7 +134,7 @@ vector<Instance> readInstancesFromFile(const string &fullFileName) {
 
 	vector<Instance> instances;
 	using std::move;
-	for (int i = 1; i < lines.size(); ++i) {
+	for (int i = 0; i < lines.size(); ++i) {
 		Instance ins;
 		readLineToInstance(lines.at(i), &ins);
 		instances.push_back(move(ins));

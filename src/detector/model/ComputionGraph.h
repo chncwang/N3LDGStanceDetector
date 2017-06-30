@@ -47,9 +47,12 @@ inline void SubGraph::initial(Graph * pcg, ModelParams & model, HyperParams & op
 	}
 }
 
-inline void SubGraph::forward(const vector<string> &words)
+void SubGraph::forward(const vector<string> &words)
 {
 	int words_num = words.size();
+	if (words_num <= 0) {
+		abort();
+	}
 	if (words_num > 1024) //TODO
 		words_num = 1024;
 
@@ -140,7 +143,7 @@ public:
     _graph->train = bTrain;
 
 	static_cast<ConditionalEncodingBehavior *>(_tweetGraph._lstm_builder_left_to_right._firstCellNodeBehavior.get())->_getNode = [&](void) ->Node& {
-		return _targetGraph._lstm_builder_left_to_right._cells.at(feature.m_target_words->size() - 1);
+		return _targetGraph._lstm_builder_left_to_right._cells.at(feature.m_target_words.size() - 1);
 	};
 
 	static_cast<ConditionalEncodingBehavior *>(_tweetGraph._lstm_builder_right_to_left._firstCellNodeBehavior.get())->_getNode = [&](void) ->Node& {
@@ -148,7 +151,7 @@ public:
 	};
 
 	_tweetGraph.forward(feature.m_tweet_words);
-	_targetGraph.forward(*feature.m_target_words);
+	_targetGraph.forward(feature.m_target_words);
 
 	int words_num = feature.m_tweet_words.size();
 	_avg_pooling.forward(_graph,

@@ -10,17 +10,15 @@ const std::vector<string> &getStanceTargets() {
 	return targets;
 }
 
-const std::vector<vector<string> > &getStanceTargetWordVectors() {
+std::vector<vector<string> > getStanceTargetWordVectors() {
 	using std::move;
 	auto &targets = getStanceTargets();
-	static std::vector<vector<string> > result;
-	if (result.empty()) {
+	 std::vector<vector<string> > result;
 		for (const std::string & str : targets) {
 			vector<string> words;
 			boost::split(words, str, boost::is_any_of(" "));
 			result.push_back(move(words));
 		}
-	}
 
 	return result;
 }

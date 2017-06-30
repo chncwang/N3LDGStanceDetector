@@ -60,7 +60,7 @@ public:
 	vector<string> m_tweet_words;
 	vector<string> m_sparse_feats;
 	Stance m_stance;
-	const std::vector<std::string> *m_target_words;
+	std::vector<std::string> m_target_words;
 };
 
 #endif /*_INSTANCE_H_*/
