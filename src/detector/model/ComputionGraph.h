@@ -70,7 +70,7 @@ void SubGraph::forward(const vector<string> &words)
 	_lstm_builder_right_to_left.forward(_graph, word_window_outputs_ptrs, words_num);
 }
 
-class ConditionalEncodingBehavior : public FirstCellNodeBehavior {
+class ConditionalEncodingBehavior : public NodeBehavior {
 public:
 	void init(int outDim, AlignedMemoryPool *pool = NULL) override {}
 	void forward(Graph *graph) {}
@@ -109,7 +109,9 @@ public:
 	_tweetGraph.initial(pcg, model, opts, mem, "tweet");
 	_targetGraph.initial(pcg, model, opts, mem, "target");
 	_tweetGraph._lstm_builder_left_to_right._firstCellNodeBehavior = std::unique_ptr<ConditionalEncodingBehavior>(new ConditionalEncodingBehavior);
+	_tweetGraph._lstm_builder_left_to_right._firstHiddenNodeBehavior = std::unique_ptr<ConditionalEncodingBehavior>(new ConditionalEncodingBehavior);
 	_tweetGraph._lstm_builder_right_to_left._firstCellNodeBehavior = std::unique_ptr<ConditionalEncodingBehavior>(new ConditionalEncodingBehavior);
+	_tweetGraph._lstm_builder_right_to_left._firstHiddenNodeBehavior = std::unique_ptr<ConditionalEncodingBehavior>(new ConditionalEncodingBehavior);
 	_concatNode.init(opts.hiddenSize * 2, mem);
 	_neural_output.setParam(&model.olayer_linear);
 	_neural_output.init(opts.labelSize, mem);
@@ -124,12 +126,21 @@ public:
 		return _targetGraph._lstm_builder_left_to_right._cells.at(feature.m_target_words.size() - 1);
 	};
 
+	static_cast<ConditionalEncodingBehavior *>(_tweetGraph._lstm_builder_left_to_right._firstHiddenNodeBehavior.get())->_getNode = [&](void) ->Node& {
+		return _targetGraph._lstm_builder_left_to_right._hiddens.at(feature.m_target_words.size() - 1);
+	};
+
 	static_cast<ConditionalEncodingBehavior *>(_tweetGraph._lstm_builder_right_to_left._firstCellNodeBehavior.get())->_getNode = [&](void) ->Node& {
 		return _targetGraph._lstm_builder_right_to_left._cells.at(0);
 	};
 
-	_tweetGraph.forward(feature.m_tweet_words);
+	static_cast<ConditionalEncodingBehavior *>(_tweetGraph._lstm_builder_right_to_left._firstHiddenNodeBehavior.get())->_getNode = [&](void) ->Node& {
+		return _targetGraph._lstm_builder_right_to_left._cells.at(0);
+	};
+
+
 	_targetGraph.forward(feature.m_target_words);
+	_tweetGraph.forward(feature.m_tweet_words);
 
 	_concatNode.forward(_graph, &_tweetGraph._lstm_builder_left_to_right._hiddens.at(feature.m_tweet_words.size() - 1), &_tweetGraph._lstm_builder_right_to_left._hiddens.at(0));
 	_neural_output.forward(_graph, &_concatNode);
