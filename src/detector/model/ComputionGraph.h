@@ -16,7 +16,7 @@ public:
 
 	void createNodes(int length);
 	void initial(Graph *pcg, ModelParams &model, HyperParams &opts,
-		AlignedMemoryPool *mem = NULL, const string &tag = "");
+		AlignedMemoryPool *mem = NULL);
 	void forward(const vector<string> &words);
 };
 
@@ -27,15 +27,15 @@ void SubGraph::createNodes(int length) {
 	_lstm_builder_right_to_left.resize(length);
 }
 
-inline void SubGraph::initial(Graph * pcg, ModelParams & model, HyperParams & opts, AlignedMemoryPool * mem, const string &tag)
+void SubGraph::initial(Graph * pcg, ModelParams & model, HyperParams & opts, AlignedMemoryPool * mem)
 {
 	_graph = pcg;
 	for (int idx = 0; idx < _word_inputs.size(); idx++) {
 		_word_inputs[idx].setParam(&model.words);
-		_word_inputs[idx].init(opts.wordDim, mem);
+		_word_inputs[idx].init(opts.wordDim, opts.dropProb, mem);
 	}
-	_lstm_builder_left_to_right.init(&model.tweet_left_to_right_lstm_params, 0.0, true, mem, tag);
-	_lstm_builder_right_to_left.init(&model.tweet_left_to_right_lstm_params, 0.0, false, mem, tag);
+	_lstm_builder_left_to_right.init(&model.tweet_left_to_right_lstm_params, opts.dropProb, true, mem);
+	_lstm_builder_right_to_left.init(&model.tweet_left_to_right_lstm_params, opts.dropProb, false, mem);
 
 	_word_window.init(opts.wordDim, opts.wordContext, mem);
 }
@@ -106,15 +106,15 @@ public:
   void initial(Graph *pcg, ModelParams &model, HyperParams &opts,
                       AlignedMemoryPool *mem = NULL) {
     _graph = pcg;
-	_tweetGraph.initial(pcg, model, opts, mem, "tweet");
-	_targetGraph.initial(pcg, model, opts, mem, "target");
+	_tweetGraph.initial(pcg, model, opts,mem);
+	_targetGraph.initial(pcg, model, opts,mem);
 	_tweetGraph._lstm_builder_left_to_right._firstCellNodeBehavior = std::unique_ptr<ConditionalEncodingBehavior>(new ConditionalEncodingBehavior);
 	_tweetGraph._lstm_builder_left_to_right._firstHiddenNodeBehavior = std::unique_ptr<ConditionalEncodingBehavior>(new ConditionalEncodingBehavior);
 	_tweetGraph._lstm_builder_right_to_left._firstCellNodeBehavior = std::unique_ptr<ConditionalEncodingBehavior>(new ConditionalEncodingBehavior);
 	_tweetGraph._lstm_builder_right_to_left._firstHiddenNodeBehavior = std::unique_ptr<ConditionalEncodingBehavior>(new ConditionalEncodingBehavior);
-	_concatNode.init(opts.hiddenSize * 2, mem);
+	_concatNode.init(opts.hiddenSize * 2, -1,mem);
 	_neural_output.setParam(&model.olayer_linear);
-	_neural_output.init(opts.labelSize, mem);
+	_neural_output.init(opts.labelSize, -1, mem);
   }
 
 public:

@@ -67,21 +67,21 @@ public:
 		//checkgrad.add(&hidden_linear.W, "hidden w");
 		//checkgrad.add(&hidden_linear.b, "hidden b");
 		checkgrad.add(&olayer_linear.W, "output layer W");
-		checkgrad.add(&tweet_left_to_right_lstm_params.cellParams.b(), "LSTM cell b");
-		checkgrad.add(&tweet_left_to_right_lstm_params.cellParams.w1(), "LSTM cell w1");
-		checkgrad.add(&tweet_left_to_right_lstm_params.cellParams.w2(), "LSTM cell w2");
-		checkgrad.add(&tweet_left_to_right_lstm_params.forgetParams.w1(), "LSTM forget w1");
-		checkgrad.add(&tweet_left_to_right_lstm_params.forgetParams.w2(), "LSTM forget w2");
-		checkgrad.add(&tweet_left_to_right_lstm_params.forgetParams.w3(), "LSTM forget w3");
-		checkgrad.add(&tweet_left_to_right_lstm_params.forgetParams.b(), "LSTM forget b");
-		checkgrad.add(&tweet_left_to_right_lstm_params.inputParams.w1(), "LSTM input w1");
-		checkgrad.add(&tweet_left_to_right_lstm_params.inputParams.w2(), "LSTM input w2");
-		checkgrad.add(&tweet_left_to_right_lstm_params.inputParams.w3(), "LSTM input w3");
-		checkgrad.add(&tweet_left_to_right_lstm_params.inputParams.b(), "LSTM input b");
-		checkgrad.add(&tweet_left_to_right_lstm_params.outputParams.w1(), "LSTM output w1");
-		checkgrad.add(&tweet_left_to_right_lstm_params.outputParams.w2(), "LSTM output w2");
-		checkgrad.add(&tweet_left_to_right_lstm_params.outputParams.w3(), "LSTM output w3");
-		checkgrad.add(&tweet_left_to_right_lstm_params.outputParams.b(), "LSTM output b");
+		checkgrad.add(&tweet_left_to_right_lstm_params.cellParams.b, "LSTM cell b");
+		checkgrad.add(&tweet_left_to_right_lstm_params.cellParams.W1, "LSTM cell w1");
+		checkgrad.add(&tweet_left_to_right_lstm_params.cellParams.W2, "LSTM cell w2");
+		checkgrad.add(&tweet_left_to_right_lstm_params.forgetParams.W1, "LSTM forget w1");
+		checkgrad.add(&tweet_left_to_right_lstm_params.forgetParams.W2, "LSTM forget w2");
+		checkgrad.add(&tweet_left_to_right_lstm_params.forgetParams.W3, "LSTM forget w3");
+		checkgrad.add(&tweet_left_to_right_lstm_params.forgetParams.b, "LSTM forget b");
+		checkgrad.add(&tweet_left_to_right_lstm_params.inputParams.W1, "LSTM input w1");
+		checkgrad.add(&tweet_left_to_right_lstm_params.inputParams.W2, "LSTM input w2");
+		checkgrad.add(&tweet_left_to_right_lstm_params.inputParams.W3, "LSTM input w3");
+		checkgrad.add(&tweet_left_to_right_lstm_params.inputParams.b, "LSTM input b");
+		checkgrad.add(&tweet_left_to_right_lstm_params.outputParams.W1, "LSTM output w1");
+		checkgrad.add(&tweet_left_to_right_lstm_params.outputParams.W2, "LSTM output w2");
+		checkgrad.add(&tweet_left_to_right_lstm_params.outputParams.W3, "LSTM output w3");
+		checkgrad.add(&tweet_left_to_right_lstm_params.outputParams.b, "LSTM output b");
 	}
 
 	// will add it later

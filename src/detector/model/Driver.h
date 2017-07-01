@@ -40,7 +40,7 @@ public:
 
 public:
   //embeddings are initialized before this separately.
-  inline void initial() {
+  void initial() {
     if (!_hyperparams.bValid()) {
       std::cout << "hyper parameter initialization Error, Please check!"
                 << std::endl;
