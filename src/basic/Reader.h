@@ -117,9 +117,12 @@ void readLineToInstance(const string &line, Instance *instance) {
 	vector<string> rawwords;
 	boost::split(rawwords, substring, boost::is_any_of(" "));
 	vector<string> words;
-	for (string & word : rawwords) {
-		if (word.empty()) continue;
-			words.push_back(word);
+	for (string & rawword : rawwords) {
+		if (rawword.empty()) continue;
+		string word = normalize_to_lowerwithdigit(rawword);
+		if (word == "rt" || word == "via" || word == "#semst") continue;
+		if (isPunctuation(word)) continue;
+		words.push_back(word);
 	}
 
 	assert(!words.empty());
