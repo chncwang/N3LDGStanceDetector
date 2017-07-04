@@ -3,6 +3,7 @@
 
 #include "ModelParams.h"
 #include "LSTM.h"
+#include "Utf.h"
 
 class SubGraph {
 public:
@@ -109,9 +110,7 @@ public:
 	_tweetGraph.initial(pcg, model, opts,mem);
 	_targetGraph.initial(pcg, model, opts,mem);
 	_tweetGraph._lstm_builder_left_to_right._firstCellNodeBehavior = std::unique_ptr<ConditionalEncodingBehavior>(new ConditionalEncodingBehavior);
-	_tweetGraph._lstm_builder_left_to_right._firstHiddenNodeBehavior = std::unique_ptr<ConditionalEncodingBehavior>(new ConditionalEncodingBehavior);
 	_tweetGraph._lstm_builder_right_to_left._firstCellNodeBehavior = std::unique_ptr<ConditionalEncodingBehavior>(new ConditionalEncodingBehavior);
-	_tweetGraph._lstm_builder_right_to_left._firstHiddenNodeBehavior = std::unique_ptr<ConditionalEncodingBehavior>(new ConditionalEncodingBehavior);
 	_concatNode.init(opts.hiddenSize * 2, -1,mem);
 	_neural_output.setParam(&model.olayer_linear);
 	_neural_output.init(opts.labelSize, -1, mem);
@@ -126,20 +125,16 @@ public:
 		return _targetGraph._lstm_builder_left_to_right._cells.at(feature.m_target_words.size() - 1);
 	};
 
-	static_cast<ConditionalEncodingBehavior *>(_tweetGraph._lstm_builder_left_to_right._firstHiddenNodeBehavior.get())->_getNode = [&](void) ->Node& {
-		return _targetGraph._lstm_builder_left_to_right._hiddens.at(feature.m_target_words.size() - 1);
-	};
-
 	static_cast<ConditionalEncodingBehavior *>(_tweetGraph._lstm_builder_right_to_left._firstCellNodeBehavior.get())->_getNode = [&](void) ->Node& {
 		return _targetGraph._lstm_builder_right_to_left._cells.at(0);
 	};
 
-	static_cast<ConditionalEncodingBehavior *>(_tweetGraph._lstm_builder_right_to_left._firstHiddenNodeBehavior.get())->_getNode = [&](void) ->Node& {
-		return _targetGraph._lstm_builder_right_to_left._cells.at(0);
-	};
+	vector<std::string> normalizedTargetWords;
+	for (const std::string &w : feature.m_target_words) {
+		normalizedTargetWords.push_back(normalize_to_lowerwithdigit(w));
+	}
 
-
-	_targetGraph.forward(feature.m_target_words);
+	_targetGraph.forward(normalizedTargetWords);
 	_tweetGraph.forward(feature.m_tweet_words);
 
 	_concatNode.forward(_graph, &_tweetGraph._lstm_builder_left_to_right._hiddens.at(feature.m_tweet_words.size() - 1), &_tweetGraph._lstm_builder_right_to_left._hiddens.at(0));
