@@ -71,7 +71,7 @@ void readLineToInstance(const string &line, Instance *instance) {
 	auto targetWordVectors = getStanceTargetWordVectors();
 	for (const string &target : getStanceTargets()) {
 		string::size_type index = line.find(target);
-		if (index == 0) {
+		if (index <= 8) {
 			instance->m_target_words = targetWordVectors.at(i);
 			tailIndex = index + target.size();
 			//cout << "Reader readLineToInstance tailIndex:" << tailIndex << endl;
@@ -134,6 +134,7 @@ vector<Instance> readInstancesFromFile(const string &fullFileName) {
 	vector<Instance> instances;
 	using std::move;
 	for (int i = 0; i < lines.size(); ++i) {
+		if (lines.at(i) == "ID Target Tweet Stance") continue;
 		Instance ins;
 		readLineToInstance(lines.at(i), &ins);
 		instances.push_back(move(ins));
@@ -143,4 +144,3 @@ vector<Instance> readInstancesFromFile(const string &fullFileName) {
 }
 
 #endif
-
