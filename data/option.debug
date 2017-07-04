@@ -8,3 +8,4 @@ dropProb = 0.1
 wordEmbFineTune = false
 wordcontext = 2
 wordCutOff = 0
+wordFile = C:/data/w2v103100-en

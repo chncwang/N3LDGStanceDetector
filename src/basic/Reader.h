@@ -119,7 +119,6 @@ void readLineToInstance(const string &line, Instance *instance) {
 	vector<string> words;
 	for (string & word : rawwords) {
 		if (word.empty()) continue;
-		boost::erase_all(word, "#");
 			words.push_back(word);
 	}
 
