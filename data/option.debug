@@ -1,11 +1,12 @@
 outBest = .debug
 maxInstance = -1
 maxIter = 1000
-batchSize = 4
+batchSize = 1
 hiddenSize = 60
 verboseIter = 1
 dropProb = 0.1
-wordEmbFineTune = false
+wordEmbSize = 100
+wordEmbFineTune = true
 wordcontext = 2
-wordCutOff = 0
-wordFile = C:/data/w2v103100-en
+wordCutOff = 5
+wordFile = /home/wqs/skip_nostop_single_100features_5minwords_5context_big.txt
