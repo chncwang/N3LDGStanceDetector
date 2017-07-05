@@ -9,4 +9,5 @@ wordEmbSize = 100
 wordEmbFineTune = true
 wordcontext = 2
 wordCutOff = 0
-#wordFile = /home/wqs/skip_nostop_single_100features_5minwords_5context_big.txt
+adaAlpha = 0.001
+wordFile = /home/wqs/skip_nostop_single_100features_5minwords_5context_big.txt
