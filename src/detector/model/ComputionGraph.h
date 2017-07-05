@@ -18,7 +18,7 @@ public:
 	void createNodes(int length);
 	void initial(Graph *pcg, ModelParams &model, HyperParams &opts,
 		AlignedMemoryPool *mem = NULL);
-	void forward(const vector<string> &words);
+	void forward(const vector<string> &words, bool useWindow);
 };
 
 void SubGraph::createNodes(int length) {
@@ -41,7 +41,7 @@ void SubGraph::initial(Graph * pcg, ModelParams & model, HyperParams & opts, Ali
 	_word_window.init(opts.wordDim, opts.wordContext, mem);
 }
 
-void SubGraph::forward(const vector<string> &words)
+void SubGraph::forward(const vector<string> &words, bool useWindow)
 {
 	int words_num = words.size();
 	if (words_num <= 0) {
@@ -59,16 +59,23 @@ void SubGraph::forward(const vector<string> &words)
 		word_input_ptrs.push_back(&n);
 	}
 
-	_word_window.forward(_graph,
-		getPNodes(_word_inputs, words_num));
+	if (useWindow) {
+		_word_window.forward(_graph,
+			getPNodes(_word_inputs, words_num));
 
-	vector<PNode> word_window_outputs_ptrs;
-	for (ConcatNode & node : _word_window._outputs) {
-		word_window_outputs_ptrs.push_back(&node);
+		vector<PNode> word_window_outputs_ptrs;
+		for (ConcatNode & node : _word_window._outputs) {
+			word_window_outputs_ptrs.push_back(&node);
+		}
+		_lstm_builder_left_to_right.forward(_graph, word_window_outputs_ptrs, words_num);
+		_lstm_builder_right_to_left._shouldLeftToRight = false;
+		_lstm_builder_right_to_left.forward(_graph, word_window_outputs_ptrs, words_num);
 	}
-	_lstm_builder_left_to_right.forward(_graph, word_window_outputs_ptrs, words_num);
-	_lstm_builder_right_to_left._shouldLeftToRight = false;
-	_lstm_builder_right_to_left.forward(_graph, word_window_outputs_ptrs, words_num);
+	else {
+		_lstm_builder_left_to_right.forward(_graph, word_input_ptrs, words_num);
+		_lstm_builder_right_to_left._shouldLeftToRight = false;
+		_lstm_builder_right_to_left.forward(_graph, word_input_ptrs, words_num);
+	}
 }
 
 class ConditionalEncodingBehavior : public NodeBehavior {
@@ -134,8 +141,8 @@ public:
 		normalizedTargetWords.push_back(normalize_to_lowerwithdigit(w));
 	}
 
-	_targetGraph.forward(normalizedTargetWords);
-	_tweetGraph.forward(feature.m_tweet_words);
+	_targetGraph.forward(normalizedTargetWords, false);
+	_tweetGraph.forward(feature.m_tweet_words, true);
 
 	_concatNode.forward(_graph, &_tweetGraph._lstm_builder_left_to_right._hiddens.at(feature.m_tweet_words.size() - 1), &_tweetGraph._lstm_builder_right_to_left._hiddens.at(0));
 	_neural_output.forward(_graph, &_concatNode);
