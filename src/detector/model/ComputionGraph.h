@@ -148,8 +148,8 @@ public:
 		normalizedTargetWords.push_back(normalize_to_lowerwithdigit(w));
 	}
 
-	_targetGraph.forward(normalizedTargetWords, true);
-	_tweetGraph.forward(feature.m_tweet_words, true);
+	_targetGraph.forward(normalizedTargetWords, false);
+	_tweetGraph.forward(feature.m_tweet_words, false);
 
 	_concatNode.forward(_graph, &_tweetGraph._lstm_builder_left_to_right._hiddens.at(feature.m_tweet_words.size() - 1), &_tweetGraph._lstm_builder_right_to_left._hiddens.at(0));
 	_neural_output.forward(_graph, &_concatNode);
