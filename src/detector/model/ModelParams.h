@@ -15,9 +15,10 @@ public:
 	UniParams olayer_linear; // output
 	LSTMParams tweet_left_to_right_lstm_params;
 	LSTMParams tweet_right_to_left_lstm_params;
+	LSTMParams target_left_to_right_lstm_params;
+	LSTMParams target_right_to_left_lstm_params;
 public:
 	MySoftMaxLoss loss;
-
 
 public:
 	bool initial(HyperParams& opts, AlignedMemoryPool* mem = NULL){
@@ -36,6 +37,8 @@ public:
 		olayer_linear.initial(opts.labelSize, opts.inputSize, false, mem);
 		tweet_left_to_right_lstm_params.initial(opts.hiddenSize, opts.windowOutput, mem);
 		tweet_right_to_left_lstm_params.initial(opts.hiddenSize, opts.windowOutput, mem);
+		target_left_to_right_lstm_params.initial(opts.hiddenSize, opts.windowOutput, mem);
+		target_right_to_left_lstm_params.initial(opts.hiddenSize, opts.windowOutput, mem);
 		return true;
 	}
 
@@ -59,6 +62,8 @@ public:
 		olayer_linear.exportAdaParams(ada);
 		tweet_left_to_right_lstm_params.exportToAdaParams(ada);
 		tweet_right_to_left_lstm_params.exportToAdaParams(ada);
+		target_left_to_right_lstm_params.exportToAdaParams(ada);
+		target_right_to_left_lstm_params.exportToAdaParams(ada);
 	}
 
 

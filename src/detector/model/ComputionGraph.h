@@ -16,7 +16,7 @@ public:
 	Graph *_graph;
 
 	void createNodes(int length);
-	void initial(Graph *pcg, ModelParams &model, HyperParams &opts,
+	void initial(Graph *pcg, ModelParams &model, HyperParams &opts, bool isTarget,
 		AlignedMemoryPool *mem = NULL);
 	void forward(const vector<string> &words, bool useWindow);
 };
@@ -28,15 +28,22 @@ void SubGraph::createNodes(int length) {
 	_lstm_builder_right_to_left.resize(length);
 }
 
-void SubGraph::initial(Graph * pcg, ModelParams & model, HyperParams & opts, AlignedMemoryPool * mem)
+void SubGraph::initial(Graph * pcg, ModelParams & model, HyperParams & opts, bool isTarget, AlignedMemoryPool * mem)
 {
 	_graph = pcg;
 	for (int idx = 0; idx < _word_inputs.size(); idx++) {
 		_word_inputs[idx].setParam(&model.words);
 		_word_inputs[idx].init(opts.wordDim, opts.dropProb, mem);
 	}
-	_lstm_builder_left_to_right.init(&model.tweet_left_to_right_lstm_params, opts.dropProb, true, mem);
-	_lstm_builder_right_to_left.init(&model.tweet_left_to_right_lstm_params, opts.dropProb, false, mem);
+
+	if (isTarget) {
+		_lstm_builder_left_to_right.init(&model.target_left_to_right_lstm_params, opts.dropProb, true, mem);
+		_lstm_builder_right_to_left.init(&model.target_right_to_left_lstm_params, opts.dropProb, false, mem);
+	}
+	else {
+		_lstm_builder_left_to_right.init(&model.tweet_left_to_right_lstm_params, opts.dropProb, true, mem);
+		_lstm_builder_right_to_left.init(&model.tweet_right_to_left_lstm_params, opts.dropProb, false, mem);
+	}
 
 	_word_window.init(opts.wordDim, opts.wordContext, mem);
 }
@@ -114,8 +121,8 @@ public:
   void initial(Graph *pcg, ModelParams &model, HyperParams &opts,
                       AlignedMemoryPool *mem = NULL) {
     _graph = pcg;
-	_tweetGraph.initial(pcg, model, opts,mem);
-	_targetGraph.initial(pcg, model, opts,mem);
+	_tweetGraph.initial(pcg, model, opts,false, mem);
+	_targetGraph.initial(pcg, model, opts, true,mem);
 	_tweetGraph._lstm_builder_left_to_right._firstCellNodeBehavior = std::unique_ptr<ConditionalEncodingBehavior>(new ConditionalEncodingBehavior);
 	_tweetGraph._lstm_builder_right_to_left._firstCellNodeBehavior = std::unique_ptr<ConditionalEncodingBehavior>(new ConditionalEncodingBehavior);
 	_concatNode.init(opts.hiddenSize * 2, -1,mem);
@@ -141,7 +148,7 @@ public:
 		normalizedTargetWords.push_back(normalize_to_lowerwithdigit(w));
 	}
 
-	_targetGraph.forward(normalizedTargetWords, false);
+	_targetGraph.forward(normalizedTargetWords, true);
 	_tweetGraph.forward(feature.m_tweet_words, true);
 
 	_concatNode.forward(_graph, &_tweetGraph._lstm_builder_left_to_right._hiddens.at(feature.m_tweet_words.size() - 1), &_tweetGraph._lstm_builder_right_to_left._hiddens.at(0));
