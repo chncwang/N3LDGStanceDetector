@@ -32,13 +32,13 @@ public:
 		opts.wordWindow = opts.wordContext * 2 + 1;
 		opts.windowOutput = opts.wordDim * opts.wordWindow;
 		opts.labelSize = 3;
-		hidden_linear.initial(opts.hiddenSize, opts.windowOutput, true, mem);
+		hidden_linear.initial(opts.hiddenSize, words.nDim, true, mem);
 		opts.inputSize = opts.hiddenSize * 2;
 		olayer_linear.initial(opts.labelSize, opts.inputSize, false, mem);
-		tweet_left_to_right_lstm_params.initial(opts.hiddenSize, opts.windowOutput, mem);
-		tweet_right_to_left_lstm_params.initial(opts.hiddenSize, opts.windowOutput, mem);
-		target_left_to_right_lstm_params.initial(opts.hiddenSize, opts.windowOutput, mem);
-		target_right_to_left_lstm_params.initial(opts.hiddenSize, opts.windowOutput, mem);
+		tweet_left_to_right_lstm_params.initial(opts.hiddenSize, opts.wordDim, mem);
+		tweet_right_to_left_lstm_params.initial(opts.hiddenSize, opts.wordDim, mem);
+		target_left_to_right_lstm_params.initial(opts.hiddenSize, opts.wordDim, mem);
+		target_right_to_left_lstm_params.initial(opts.hiddenSize, opts.wordDim, mem);
 		return true;
 	}
 
