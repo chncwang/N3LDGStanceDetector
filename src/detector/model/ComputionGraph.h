@@ -38,7 +38,7 @@ public:
 		n.setParam(&model.words);
 	}
 	_left2right.init(_dropout, &model.target_left_to_right_lstm_params , true, _pool);
-	_right2left.init(_dropout, &model.target_left_to_right_lstm_params , false, _pool);
+	_right2left.init(_dropout, &model.target_right_to_left_lstm_params , false, _pool);
 
 	_dropout = opts.dropProb;
 	_concatNode.init(opts.hiddenSize * 2, -1,mem);
@@ -52,7 +52,6 @@ public:
   // some nodes may behave different during training and decode, for example, dropout
   inline void forward(const Feature &feature, bool bTrain = false) {
     _graph->train = bTrain;
-
 
 	vector<std::string> normalizedTargetWords;
 	for (const std::string &w : feature.m_target_words) {
@@ -74,7 +73,7 @@ public:
 	}
 
 	_left2right.setParam(&_modelParams->target_left_to_right_lstm_params, &_modelParams->tweet_left_to_right_lstm_params, feature.m_target_words.size());
-	_right2left.setParam(&_modelParams->target_left_to_right_lstm_params, &_modelParams->tweet_left_to_right_lstm_params, feature.m_target_words.size());
+	_right2left.setParam(&_modelParams->target_right_to_left_lstm_params, &_modelParams->tweet_right_to_left_lstm_params, feature.m_target_words.size());
 
 	_left2right.forward(_graph, inputNodes, normalizedTargetWords.size());
 	_right2left.forward(_graph, inputNodes, normalizedTargetWords.size());
