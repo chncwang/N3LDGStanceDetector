@@ -1,22 +1,23 @@
 #ifndef SRC_ModelParams_H_
 #define SRC_ModelParams_H_
 #include "HyperParams.h"
-#include "LSTM.h"
+#include "ConditionalLSTM.h"
 #include "MySoftMaxLoss.h"
 
 // Each model consists of two parts, building neural graph and defining output losses.
 class ModelParams{
+private:
 
 public:
-	Alphabet wordAlpha; // should be initialized outside
 	LookupTable words; // should be initialized outside
+	Alphabet wordAlpha; // should be initialized outside
 	Alphabet featAlpha;
 	UniParams hidden_linear;
 	UniParams olayer_linear; // output
-	LSTMParams tweet_left_to_right_lstm_params;
-	LSTMParams tweet_right_to_left_lstm_params;
-	LSTMParams target_left_to_right_lstm_params;
-	LSTMParams target_right_to_left_lstm_params;
+	ConditionalLSTMParams tweet_left_to_right_lstm_params;
+	ConditionalLSTMParams tweet_right_to_left_lstm_params;
+	ConditionalLSTMParams target_left_to_right_lstm_params;
+	ConditionalLSTMParams target_right_to_left_lstm_params;
 public:
 	MySoftMaxLoss loss;
 
@@ -60,10 +61,10 @@ public:
 		words.exportAdaParams(ada);
 		hidden_linear.exportAdaParams(ada);
 		olayer_linear.exportAdaParams(ada);
-		tweet_left_to_right_lstm_params.exportToAdaParams(ada);
-		tweet_right_to_left_lstm_params.exportToAdaParams(ada);
-		target_left_to_right_lstm_params.exportToAdaParams(ada);
-		target_right_to_left_lstm_params.exportToAdaParams(ada);
+		tweet_left_to_right_lstm_params.exportAdaParams(ada);
+		tweet_right_to_left_lstm_params.exportAdaParams(ada);
+		target_left_to_right_lstm_params.exportAdaParams(ada);
+		target_right_to_left_lstm_params.exportAdaParams(ada);
 	}
 
 
@@ -72,21 +73,18 @@ public:
 		//checkgrad.add(&hidden_linear.W, "hidden w");
 		//checkgrad.add(&hidden_linear.b, "hidden b");
 		checkgrad.add(&olayer_linear.W, "output layer W");
-		checkgrad.add(&tweet_left_to_right_lstm_params.cellParams.b, "LSTM cell b");
-		checkgrad.add(&tweet_left_to_right_lstm_params.cellParams.W1, "LSTM cell w1");
-		checkgrad.add(&tweet_left_to_right_lstm_params.cellParams.W2, "LSTM cell w2");
-		checkgrad.add(&tweet_left_to_right_lstm_params.forgetParams.W1, "LSTM forget w1");
-		checkgrad.add(&tweet_left_to_right_lstm_params.forgetParams.W2, "LSTM forget w2");
-		checkgrad.add(&tweet_left_to_right_lstm_params.forgetParams.W3, "LSTM forget w3");
-		checkgrad.add(&tweet_left_to_right_lstm_params.forgetParams.b, "LSTM forget b");
-		checkgrad.add(&tweet_left_to_right_lstm_params.inputParams.W1, "LSTM input w1");
-		checkgrad.add(&tweet_left_to_right_lstm_params.inputParams.W2, "LSTM input w2");
-		checkgrad.add(&tweet_left_to_right_lstm_params.inputParams.W3, "LSTM input w3");
-		checkgrad.add(&tweet_left_to_right_lstm_params.inputParams.b, "LSTM input b");
-		checkgrad.add(&tweet_left_to_right_lstm_params.outputParams.W1, "LSTM output w1");
-		checkgrad.add(&tweet_left_to_right_lstm_params.outputParams.W2, "LSTM output w2");
-		checkgrad.add(&tweet_left_to_right_lstm_params.outputParams.W3, "LSTM output w3");
-		checkgrad.add(&tweet_left_to_right_lstm_params.outputParams.b, "LSTM output b");
+		checkgrad.add(&tweet_left_to_right_lstm_params.cell.b, "LSTM cell b");
+		checkgrad.add(&tweet_left_to_right_lstm_params.cell.W1, "LSTM cell w1");
+		checkgrad.add(&tweet_left_to_right_lstm_params.cell.W2, "LSTM cell w2");
+		checkgrad.add(&tweet_left_to_right_lstm_params.forget.W1, "LSTM forget w1");
+		checkgrad.add(&tweet_left_to_right_lstm_params.forget.W2, "LSTM forget w2");
+		checkgrad.add(&tweet_left_to_right_lstm_params.forget.b, "LSTM forget b");
+		checkgrad.add(&tweet_left_to_right_lstm_params.input.W1, "LSTM input w1");
+		checkgrad.add(&tweet_left_to_right_lstm_params.input.W2, "LSTM input w2");
+		checkgrad.add(&tweet_left_to_right_lstm_params.input.b, "LSTM input b");
+		checkgrad.add(&tweet_left_to_right_lstm_params.output.W1, "LSTM output w1");
+		checkgrad.add(&tweet_left_to_right_lstm_params.output.W2, "LSTM output w2");
+		checkgrad.add(&tweet_left_to_right_lstm_params.output.b, "LSTM output b");
 	}
 
 	// will add it later
