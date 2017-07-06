@@ -1,7 +1,6 @@
 #ifndef SRC_ModelParams_H_
 #define SRC_ModelParams_H_
 #include "HyperParams.h"
-#include "ConditionalLSTM.h"
 #include "MySoftMaxLoss.h"
 #include "ConditionalLSTM.h"
 
