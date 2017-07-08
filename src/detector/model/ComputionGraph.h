@@ -17,7 +17,7 @@ public:
 	MaxPoolNode _max_pooling;
 	MinPoolNode _min_pooling;
 	ConcatNode _poolingConcatNode;
-	UniNode _neural_output;
+	LinearNode _neural_output;
 	float _dropout;
 	AlignedMemoryPool *_pool;
 
