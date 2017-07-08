@@ -228,7 +228,7 @@ protected:
         _forgetgates[idx].forward(cg, &_bucket, x[idx]);
         _halfcells[idx].forward(cg, &_bucket, x[idx]);
         _inputfilters[idx].forward(cg, &_halfcells[idx], &_inputgates[idx]);
-        _forgetfilters[idx].forward(cg, &_cells[targetSize - 1], &_forgetgates[idx]);
+        _forgetfilters[idx].forward(cg, &_cells[0], &_forgetgates[idx]);
         _cells[idx].forward(cg, &_inputfilters[idx], &_forgetfilters.at(idx));
         _halfhiddens[idx].forward(cg, &_cells[idx]);
         _outputgates[idx].forward(cg, &_bucket, x[idx]);
