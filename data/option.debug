@@ -1,12 +1,12 @@
 outBest = .debug
 maxInstance = -1
 maxIter = 1000
-batchSize = 1
+batchSize = 70
 hiddenSize = 60
 verboseIter = 1
-dropProb = 0.3
+dropProb = 0.1
 wordEmbSize = 100
 wordEmbFineTune = true
 wordcontext = 2
-wordCutOff = 0
-adaAlpha = 0.001
+wordCutOff = 5
+adaAlpha = 0.0001

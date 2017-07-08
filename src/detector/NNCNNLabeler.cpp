@@ -211,7 +211,7 @@ void Classifier::train(const string &trainFile, const string &devFile,
 	  againstMetric.predicated_label_count += m_driver._against_metric.predicated_label_count;
       m_driver.updateModel();
 	
-	  if (updateIter % 100 == 99) {
+	  if (updateIter % 10 == 1) {
 		  std::cout << "current: " << updateIter + 1 << ", total block: "
 			  << batchBlock << std::endl;
 		  std::cout << "favor:" << std::endl;
