@@ -13,7 +13,7 @@ public:
 	ConditionalLSTMBuilder _left2right;
 	ConditionalLSTMBuilder _right2left;
 	ConcatNode _concatNode;
-	UniNode _neural_output;
+	LinearNode _neural_output;
 	float _dropout;
 	AlignedMemoryPool *_pool;
 

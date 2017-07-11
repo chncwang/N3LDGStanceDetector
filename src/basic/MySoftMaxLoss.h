@@ -33,26 +33,26 @@ public:
 			scores[i] = -1e10;
 			if (answer[i] >= 0) {
 				scores[i] = exp(x->val[i] - maxScore);
-				if (answer[i] == 1)
+				if (isEqual(answer[i] , 1))
 					sum1 += scores[i];
 				sum2 += scores[i];
 			}
 		}
 		cost += (log(sum2) - log(sum1)) / batchsize;
 		if (optLabel == Stance::FAVOR) {
-			if (answer[optLabel] == 1)
+			if (isEqual(answer[optLabel], 1))
 				favorMetric.correct_label_count++;
 			favorMetric.predicated_label_count++;
 		}
-		if (answer[Stance::FAVOR] == 1) {
+		if (isEqual(answer[Stance::FAVOR], 1)) {
 			favorMetric.overall_label_count++;
 		}
-		if (optLabel == Stance::AGAINST) {
-			if (answer[optLabel] == 1)
+		if (isEqual(optLabel, Stance::AGAINST)) {
+			if (isEqual(answer[optLabel] , 1))
 				againstMetric.correct_label_count++;
 			againstMetric.predicated_label_count++;
 		}
-		if (answer[Stance::AGAINST] == 1) {
+		if (isEqual(answer[Stance::AGAINST] , 1)) {
 			againstMetric.overall_label_count++;
 		}
 
@@ -63,7 +63,6 @@ public:
 		}
 		
 		return cost;
-
 	}
 
 	inline dtype predict(PNode x, int& y){
@@ -113,7 +112,7 @@ public:
 			scores[i] = -1e10;
 			if (answer[i] >= 0) {
 				scores[i] = exp(x->val[i] - maxScore);
-				if (answer[i] == 1)
+				if (isEqual(answer[i],  1))
 					sum1 += scores[i];
 				sum2 += scores[i];
 			}
