@@ -72,7 +72,26 @@ void readLineToInstance(const string &line, Instance *instance) {
 	for (const string &target : getStanceTargets()) {
 		string::size_type index = line.find(target);
 		if (index <= 8) {
-			instance->m_target_words = targetWordVectors.at(i);
+			string firstWord = targetWordVectors.at(i).at(0);
+			if (firstWord == "Atheism") {
+				instance->m_target_words = {"#atheism"};
+			}
+			else if (firstWord == "Climate") {
+				instance->m_target_words = {"#climatechange"};
+			}
+			else if (firstWord == "Feminist") {
+				instance->m_target_words = { "#feminism" };
+			}
+			else if (firstWord == "Hillary") {
+				instance->m_target_words = {"#hillaryclinton"};
+			}
+			else if (firstWord == "Legalization") {
+				instance->m_target_words = {"#prochoice"};
+			}
+			else if (firstWord == "Donald") {
+				instance->m_target_words = { "#donaldtrump" };
+			}
+
 			tailIndex = index + target.size();
 			//cout << "Reader readLineToInstance tailIndex:" << tailIndex << endl;
 			break;
