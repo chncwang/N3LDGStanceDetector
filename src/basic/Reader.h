@@ -139,7 +139,7 @@ void readLineToInstance(const string &line, Instance *instance) {
 	for (string & rawword : rawwords) {
 		if (rawword.empty()) continue;
 		string word = normalize_to_lowerwithdigit(rawword);
-		if (word == "rt" || word == "via" || word == "#semst") continue;
+		if (word == "rt" || word == "via" || word == "#semst" || word == "thats" || word == "im" || word == "s") continue;
 		if (isPunctuation(word)) continue;
 		words.push_back(word);
 	}
