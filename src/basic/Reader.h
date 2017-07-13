@@ -91,6 +91,9 @@ void readLineToInstance(const string &line, Instance *instance) {
 			else if (firstWord == "Donald") {
 				instance->m_target_words = { "#donaldtrump" };
 			}
+			else {
+				abort();
+			}
 
 			tailIndex = index + target.size();
 			//cout << "Reader readLineToInstance tailIndex:" << tailIndex << endl;
@@ -139,7 +142,7 @@ void readLineToInstance(const string &line, Instance *instance) {
 	for (string & rawword : rawwords) {
 		if (rawword.empty()) continue;
 		string word = normalize_to_lowerwithdigit(rawword);
-		if (word == "rt" || word == "via" || word == "#semst" || word == "thats" || word == "im" || word == "s") continue;
+		if (word == "rt" || word == "via" || word == "#semst") continue;
 		if (isPunctuation(word)) continue;
 		words.push_back(word);
 	}
