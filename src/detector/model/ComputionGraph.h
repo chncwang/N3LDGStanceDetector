@@ -37,10 +37,10 @@ public:
 		n.init(opts.wordDim, opts.dropProb, mem);
 		n.setParam(&model.words);
 	}
+	_dropout = opts.dropProb;
 	_left2right.init(_dropout, &model.target_left_to_right_lstm_params , true, _pool);
 	_right2left.init(_dropout, &model.target_right_to_left_lstm_params , false, _pool);
 
-	_dropout = opts.dropProb;
 	_concatNode.init(opts.hiddenSize * 2, -1,mem);
 	_neural_output.setParam(&model.olayer_linear);
 	_neural_output.init(opts.labelSize, -1, mem);
