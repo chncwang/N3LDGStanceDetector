@@ -1,10 +1,11 @@
-batchSize = 1
-hiddenSize = 50
-dropProb = 0.5
+batchSize = 90
+hiddenSize = 60
+dropProb = 0.0
+hiddenDropProb = 0.0
 wordEmbSize = 100
 wordEmbFineTune = true
-wordCutOff = 5
-adaAlpha = 0.001
+wordCutOff = 4
+adaAlpha = 0.0001
 outBest = .debug
 maxInstance = -1
 maxIter = 1000

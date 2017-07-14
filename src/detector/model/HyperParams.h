@@ -42,7 +42,7 @@ public:
 		hiddenSize = opt.hiddenSize;
 		wordContext = opt.wordcontext;
 		dropProb = opt.dropProb;
-		hiddenDropProb = opt.dropProb;
+		hiddenDropProb = opt.hiddenDropProb;
 		batch = opt.batchSize;
 
 		bAssigned = true;
