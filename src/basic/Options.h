@@ -23,6 +23,7 @@ public:
 	dtype adaAlpha;
 	dtype regParameter;
 	dtype dropProb;
+	dtype hiddenDropProb;
 
 	int hiddenSize;
 	int wordEmbSize;
@@ -53,6 +54,7 @@ public:
 		adaAlpha = 0.01;
 		regParameter = 1e-8;
 		dropProb = 0.0;
+		hiddenDropProb = 0.0;
 
 		hiddenSize = 100;
 		wordEmbSize = 50;
@@ -98,6 +100,8 @@ public:
 				regParameter = atof(pr.second.c_str());
 			if (pr.first == "dropProb")
 				dropProb = atof(pr.second.c_str());
+			if (pr.first == "hiddenDropProb")
+				hiddenDropProb = atof(pr.second.c_str());
 
 			if (pr.first == "hiddenSize")
 				hiddenSize = atoi(pr.second.c_str());
@@ -140,6 +144,7 @@ public:
 		std::cout << "adaAlpha = " << adaAlpha << std::endl;
 		std::cout << "regParameter = " << regParameter << std::endl;
 		std::cout << "dropProb = " << dropProb << std::endl;
+		std::cout << "hiddenDropProb = " << hiddenDropProb << std::endl;
 
 		std::cout << "hiddenSize = " << hiddenSize << std::endl;
 		std::cout << "wordEmbSize = " << wordEmbSize << std::endl;

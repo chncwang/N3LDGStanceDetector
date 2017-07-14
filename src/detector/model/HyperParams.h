@@ -21,7 +21,7 @@ struct HyperParams{
 	int wordWindow;
 	int windowOutput;
 	dtype dropProb;
-
+	dtype hiddenDropProb;
 
 	//auto generated
 	int wordDim;
@@ -42,6 +42,7 @@ public:
 		hiddenSize = opt.hiddenSize;
 		wordContext = opt.wordcontext;
 		dropProb = opt.dropProb;
+		hiddenDropProb = opt.dropProb;
 		batch = opt.batchSize;
 
 		bAssigned = true;
@@ -66,7 +67,7 @@ public:
 		os << wordWindow << std::endl;
 		os << windowOutput << std::endl;
 		os << dropProb << std::endl;
-
+		os << hiddenDropProb << std::endl;
 
 		os << wordDim << std::endl;
 		os << inputSize << std::endl;
@@ -83,7 +84,7 @@ public:
 		is >> wordWindow;
 		is >> windowOutput;
 		is >> dropProb;
-
+		is >> hiddenDropProb;
 
 		is >> wordDim;
 		is >> inputSize;
