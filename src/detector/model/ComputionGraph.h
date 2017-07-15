@@ -36,8 +36,8 @@ public:
 		n.init(opts.wordDim, opts.dropProb, mem);
 		n.setParam(&model.words);
 	}
-	_left2right.init(opts.hiddenDropProb, &model.target_left_to_right_lstm_params , true, _pool);
-	_right2left.init(opts.hiddenDropProb, &model.target_right_to_left_lstm_params , false, _pool);
+	_left2right.init(opts.dropProb, &model.target_left_to_right_lstm_params , true, _pool);
+	_right2left.init(opts.dropProb, &model.target_right_to_left_lstm_params , false, _pool);
 
 	_concatNode.init(opts.hiddenSize * 2, -1,mem);
 	_neural_output.setParam(&model.olayer_linear);
