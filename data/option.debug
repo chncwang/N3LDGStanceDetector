@@ -11,3 +11,4 @@ maxInstance = -1
 maxIter = 1000
 verboseIter = 1
 wordcontext = 2
+wordFile = /home/wqs/skip_nostop_single_100features_5minwords_5context_big.txt
