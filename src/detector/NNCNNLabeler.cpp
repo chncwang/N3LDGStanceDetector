@@ -188,7 +188,7 @@ void Classifier::train(const string &trainFile, const string &devFile,
 		std::cout << "##### Iteration " << iter << std::endl;
 
 		random_shuffle(indexes.begin(), indexes.end());
-		Metric favorMetric, againstMetric;
+		Metric favorMetric, againstMetric, neuralMetric;
 		auto time_start = std::chrono::high_resolution_clock::now();
 		for (int updateIter = 0; updateIter < batchBlock; updateIter++) {
 			subExamples.clear();
@@ -210,6 +210,9 @@ void Classifier::train(const string &trainFile, const string &devFile,
 			againstMetric.overall_label_count += m_driver._against_metric.overall_label_count;
 			againstMetric.correct_label_count += m_driver._against_metric.correct_label_count;
 			againstMetric.predicated_label_count += m_driver._against_metric.predicated_label_count;
+			neuralMetric.overall_label_count += m_driver._neural_metric.overall_label_count;
+			neuralMetric.correct_label_count += m_driver._neural_metric.correct_label_count;
+			neuralMetric.predicated_label_count += m_driver._neural_metric.predicated_label_count;
 			m_driver.updateModel();
 
 			if (updateIter % 10 == 1) {
@@ -219,6 +222,8 @@ void Classifier::train(const string &trainFile, const string &devFile,
 				favorMetric.print();
 				std::cout << "against:" << std::endl;
 				againstMetric.print();
+				std::cout << "neural:" << std::endl;
+				neuralMetric.print();
 			}
 		}
 		auto time_end = std::chrono::high_resolution_clock::now();

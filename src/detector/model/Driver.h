@@ -33,6 +33,7 @@ public:
 
   Metric _favor_metric;
   Metric _against_metric;
+  Metric _neural_metric;
   CheckGrad _checkgrad;
   ModelUpdate _ada;  // model update
   AlignedMemoryPool _aligned_mem;
@@ -120,7 +121,7 @@ public:
     for (int count = 0; count < example_num; count++) {
       const Example &example = examples[count];
       cost += _modelparams.loss.loss(&_builders[count]._neural_output,
-          example.m_label, _favor_metric, _against_metric, example_num);
+          example.m_label, _favor_metric, _against_metric, _neural_metric, example_num);
     }
     _cg.backward();
 
@@ -165,6 +166,7 @@ private:
   inline void resetEval() {
 	  _favor_metric.reset();
 	  _against_metric.reset();
+	  _neural_metric.reset();
   }
 
 

@@ -9,7 +9,7 @@
 
 class MySoftMaxLoss{
 public:
-	inline dtype loss(PNode x, const vector<dtype> &answer, Metric& favorMetric, Metric &againstMetric, int batchsize = 1){
+	inline dtype loss(PNode x, const vector<dtype> &answer, Metric& favorMetric, Metric &againstMetric, Metric &neuralMetric, int batchsize = 1){
 		int nDim = x->dim;
 		int labelsize = answer.size();
 		if (labelsize != nDim) {
@@ -54,6 +54,14 @@ public:
 		}
 		if (isEqual(answer[Stance::AGAINST] , 1)) {
 			againstMetric.overall_label_count++;
+		}
+		if (isEqual(optLabel, Stance::NONE)) {
+			if (isEqual(answer[optLabel] , 1))
+				neuralMetric.correct_label_count++;
+			neuralMetric.predicated_label_count++;
+		}
+		if (isEqual(answer[Stance::NONE] , 1)) {
+			neuralMetric.overall_label_count++;
 		}
 
 		for (int i = 0; i < nDim; ++i) {
