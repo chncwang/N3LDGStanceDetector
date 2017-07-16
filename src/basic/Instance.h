@@ -56,11 +56,27 @@ public:
 		clear();
 		m_tweet_words.resize(length);
 	}
+
+	std::string tostring();
 public:
 	vector<string> m_tweet_words;
 	vector<string> m_sparse_feats;
 	Stance m_stance;
 	std::vector<std::string> m_target_words;
 };
+
+std::string Instance::tostring() {
+	string result = "target: ";
+	for (string & w : m_target_words) {
+		result += w + " ";
+	}
+	result += "\ntweet: ";
+
+	for (string & w : m_tweet_words) {
+		result += w + " ";
+	}
+	result += "\nstance: " + StanceToString(m_stance);
+	return result;
+}
 
 #endif /*_INSTANCE_H_*/
