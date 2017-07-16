@@ -122,6 +122,8 @@ void readLineToInstance(const string &line, Instance *instance) {
 		}
 	}
 
+	assert(index != string::npos);
+
 	string substring = line.substr(tailIndex, index - tailIndex);
 	//std::cout << "Reader readLineToInstance substring:" << substring << endl;
 	
