@@ -103,7 +103,7 @@ void readLineToInstance(const string &line, Instance *instance) {
 	}
 
 	if (tailIndex == -1) {
-		//cout << "target not found!" << endl;
+		cout << "target not found!" << line << endl;
 		assert(false);
 	}
 
@@ -111,7 +111,8 @@ void readLineToInstance(const string &line, Instance *instance) {
 	for (int i = 0; i < 3; ++i) {
 		Stance stance = static_cast<Stance>(i);
 		const string &stanceStr = StanceToString(stance);
-		std::regex regex(stanceStr + "\s*$");
+//                std::cout << "stanceStr:" << stanceStr <<std::endl;
+		std::regex regex(stanceStr + "$");
 		for (auto it = std::sregex_iterator(line.begin(), line.end(), regex);
 			it != std::sregex_iterator();
 			++it)
@@ -121,6 +122,10 @@ void readLineToInstance(const string &line, Instance *instance) {
 			break;
 		}
 	}
+        if (index == string::npos) {
+          std::cout<< line << std::endl;
+          abort();
+        }
 
 	assert(index != string::npos);
 
