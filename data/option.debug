@@ -1,8 +1,8 @@
 wordEmbFineTune = false
-hiddenSize = 70
-wordCutOff = 5
-dropProb = 0.3
-batchSize = 2
+hiddenSize = 60
+wordCutOff = 4
+dropProb = 0.5
+batchSize = 90
 adaAlpha = 0.0001
 wordFile = /home/wqs/skip_nostop_single_100features_5minwords_5context_big.txt
 maxIter = 1000
