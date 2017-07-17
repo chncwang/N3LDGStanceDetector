@@ -16,7 +16,7 @@ std::vector<vector<string> > getStanceTargetWordVectors() {
 	 std::vector<vector<string> > result;
 		for (const std::string & str : targets) {
 			vector<string> words;
-			boost::split(words, str, boost::is_any_of(" "));
+			words.push_back(str);
 			result.push_back(move(words));
 		}
 
