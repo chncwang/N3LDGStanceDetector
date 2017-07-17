@@ -79,4 +79,26 @@ std::string Instance::tostring() {
 	return result;
 }
 
+void printStanceCount(const vector<Instance> &instances) {
+	int favorCount = 0;
+	int againstCount = 0;
+	int neutralCount = 0;
+	for (const Instance &ins : instances) {
+		if (ins.m_stance == Stance::FAVOR) {
+			favorCount++;
+		}
+		else if (ins.m_stance == Stance::AGAINST) {
+			againstCount++;
+		}
+		else if (ins.m_stance == Stance::NONE) {
+			neutralCount++;
+		}
+		else {
+			abort();
+		}
+	}
+
+	std::cout << "favor: " << favorCount << " against: " << againstCount << " neutral: " << neutralCount << std::endl;
+}
+
 #endif /*_INSTANCE_H_*/

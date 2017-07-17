@@ -136,8 +136,15 @@ void Classifier::train(const string &trainFile, const string &devFile,
 		trainInsts.push_back(ins);
 	}
 
+	std::cout << "train instances:" << std::endl;
+	printStanceCount(trainInsts);
+
 	vector<Instance> devInsts = readInstancesFromFile(devFile);
+	std::cout << "dev instances:" << std::endl;
+	printStanceCount(devInsts);
 	vector<Instance> testInsts = readInstancesFromFile(testFile);
+	std::cout << "test instances:" << std::endl;
+	printStanceCount(testInsts);
 
 	createAlphabet(trainInsts);
 	addTestAlpha(devInsts);
