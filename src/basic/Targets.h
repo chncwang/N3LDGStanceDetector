@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <string>
-#include <boost/algorithm/string.hpp>
+#include "MyLib.h"
 
 const std::vector<string> &getStanceTargets() {
 	static std::vector<std::string> targets = {"Atheism", "Climate Change is a Real Concern", "Feminist Movement", "Hillary Clinton", "Legalization of Abortion", "Donald Trump"};
@@ -16,7 +16,7 @@ std::vector<vector<string> > getStanceTargetWordVectors() {
 	 std::vector<vector<string> > result;
 		for (const std::string & str : targets) {
 			vector<string> words;
-			words.push_back(str);
+                        split_bychar(str, words);
 			result.push_back(move(words));
 		}
 

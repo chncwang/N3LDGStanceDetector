@@ -92,6 +92,7 @@ void readLineToInstance(const string &line, Instance *instance) {
 				instance->m_target_words = { "#donaldtrump" };
 			}
 			else {
+                          std::cout <<firstWord << std::endl;
 				abort();
 			}
 
@@ -112,7 +113,7 @@ void readLineToInstance(const string &line, Instance *instance) {
 		Stance stance = static_cast<Stance>(i);
 		const string &stanceStr = StanceToString(stance);
 //                std::cout << "stanceStr:" << stanceStr <<std::endl;
-		std::regex regex(stanceStr + "$");
+		std::regex regex(stanceStr + "\r?$");
 		for (auto it = std::sregex_iterator(line.begin(), line.end(), regex);
 			it != std::sregex_iterator();
 			++it)
