@@ -9,12 +9,12 @@
 
 class MySoftMaxLoss{
 public:
-	inline dtype loss(PNode x, const vector<dtype> &answer, Metric& favorMetric, Metric &againstMetric, Metric &neuralMetric, int batchsize = 1){
+	inline dtype loss(PNode x, Stance answer, Metric& favorMetric, Metric &againstMetric, Metric &neuralMetric, int batchsize = 1){
 		int nDim = x->dim;
-		int labelsize = answer.size();
+		int labelsize = 3;
 		if (labelsize != nDim) {
 			std::cerr << "softmax_loss error: dim size invalid" << std::endl;
-			return -1.0;
+			abort();
 		}
 
 		NRVec<dtype> scores(nDim);
@@ -22,52 +22,47 @@ public:
 		dtype cost = 0.0;
 		int optLabel = -1;
 		for (int i = 0; i < nDim; ++i) {
-			if (answer[i] >= 0) {
 				if (optLabel < 0 || x->val[i] > x->val[optLabel])
 					optLabel = i;
-			}
 		}
 
 		dtype sum1 = 0, sum2 = 0, maxScore = x->val[optLabel];
 		for (int i = 0; i < nDim; ++i) {
 			scores[i] = -1e10;
-			if (answer[i] >= 0) {
 				scores[i] = exp(x->val[i] - maxScore);
-				if (isEqual(answer[i] , 1))
+				if (answer == i)
 					sum1 += scores[i];
 				sum2 += scores[i];
-			}
 		}
 		cost += (log(sum2) - log(sum1)) / batchsize;
 		if (optLabel == Stance::FAVOR) {
-			if (isEqual(answer[optLabel], 1))
+			if (answer == optLabel)
 				favorMetric.correct_label_count++;
 			favorMetric.predicated_label_count++;
 		}
-		if (isEqual(answer[Stance::FAVOR], 1)) {
+		if (answer == Stance::FAVOR) {
 			favorMetric.overall_label_count++;
 		}
-		if (isEqual(optLabel, Stance::AGAINST)) {
-			if (isEqual(answer[optLabel] , 1))
+		if (optLabel == Stance::AGAINST) {
+			if (answer == optLabel)
 				againstMetric.correct_label_count++;
 			againstMetric.predicated_label_count++;
 		}
-		if (isEqual(answer[Stance::AGAINST] , 1)) {
+		if (answer==Stance::AGAINST) {
 			againstMetric.overall_label_count++;
 		}
-		if (isEqual(optLabel, Stance::NONE)) {
-			if (isEqual(answer[optLabel] , 1))
+		if (optLabel == Stance::NONE) {
+			if (answer  ==optLabel)
 				neuralMetric.correct_label_count++;
 			neuralMetric.predicated_label_count++;
 		}
-		if (isEqual(answer[Stance::NONE] , 1)) {
+		if (answer ==Stance::NONE) {
 			neuralMetric.overall_label_count++;
 		}
 
 		for (int i = 0; i < nDim; ++i) {
-			if (answer[i] >= 0) {
-				x->loss[i] = (scores[i] / sum2 - answer[i]) / batchsize;
-			}
+			float t = answer == i ? 1.0 : 0.0;
+				x->loss[i] = (scores[i] / sum2 - t) / batchsize;
 		}
 		
 		return cost;
@@ -95,9 +90,9 @@ public:
 		return prob;
 	}
 
-	inline dtype cost(PNode x, const vector<dtype> &answer, int batchsize = 1){
+	inline dtype cost(PNode x, Stance answer, int batchsize = 1){
 		int nDim = x->dim;
-		int labelsize = answer.size();
+		int labelsize = 3;
 		if (labelsize != nDim) {
 			std::cerr << "softmax_loss error: dim size invalid" << std::endl;
 			return -1.0;
@@ -109,21 +104,17 @@ public:
 
 		int optLabel = -1;
 		for (int i = 0; i < nDim; ++i) {
-			if (answer[i] >= 0) {
 				if (optLabel < 0 || x->val[i] > x->val[optLabel])
 					optLabel = i;
-			}
 		}
 
 		dtype sum1 = 0, sum2 = 0, maxScore = x->val[optLabel];
 		for (int i = 0; i < nDim; ++i) {
 			scores[i] = -1e10;
-			if (answer[i] >= 0) {
 				scores[i] = exp(x->val[i] - maxScore);
-				if (isEqual(answer[i],  1))
+				if (answer == i)
 					sum1 += scores[i];
 				sum2 += scores[i];
-			}
 		}
 		cost += (log(sum2) - log(sum1)) / batchsize;
 		return cost;

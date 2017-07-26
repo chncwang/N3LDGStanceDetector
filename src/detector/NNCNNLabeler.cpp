@@ -101,9 +101,7 @@ void Classifier::extractFeature(Feature &feat, const Instance *pInstance) {
 }
 
 void Classifier::convert2Example(const Instance *pInstance, Example &exam) {
-	vector<dtype> stanceVector = { 0, 0, 0 };
-	stanceVector.at(pInstance->m_stance) = 1;
-	exam.m_label = stanceVector;
+	exam.m_stance = pInstance->m_stance;
 	Feature feature;
 	extractFeature(feature, pInstance);
 	exam.m_feature = feature;
@@ -179,22 +177,18 @@ void Classifier::train(const string &trainFile, const string &devFile,
 
 	int inputSize = trainExamples.size();
 
-	int batchBlock = inputSize / m_options.batchSize;
-	if (inputSize % m_options.batchSize != 0)
-		batchBlock++;
 
 	srand(0);
-	std::vector<int> indexes;
-	for (int i = 0; i < inputSize; ++i)
-		indexes.push_back(i);
 
 	static vector<Example> subExamples;
 	int devNum = devExamples.size(), testNum = testExamples.size();
 	int non_exceeds_time = 0;
 	for (int iter = 0; iter < m_options.maxIter; ++iter) {
 		std::cout << "##### Iteration " << iter << std::endl;
-
-		random_shuffle(indexes.begin(), indexes.end());
+		std::vector<int> indexes = getClassBalancedIndexes(trainExamples);
+		int batchBlock = indexes.size() / m_options.batchSize;
+		if (indexes.size() % m_options.batchSize != 0)
+			batchBlock++;
 		Metric favorMetric, againstMetric, neuralMetric;
 		auto time_start = std::chrono::high_resolution_clock::now();
 		for (int updateIter = 0; updateIter < batchBlock; updateIter++) {
@@ -266,7 +260,7 @@ void Classifier::train(const string &trainFile, const string &devFile,
 			std::cout << "against:" << std::endl;
 			against.print();
 
-			if (!m_options.outBest.empty()  > bestDIS) {
+			if (!m_options.outBest.empty() > bestDIS) {
 				/*m_pipe.outputAllInstances(devFile + m_options.outBest,
 				decodeInstResults);*/
 				bCurIterBetter = true;

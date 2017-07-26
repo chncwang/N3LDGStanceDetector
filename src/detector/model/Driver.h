@@ -121,7 +121,7 @@ public:
     for (int count = 0; count < example_num; count++) {
       const Example &example = examples[count];
       cost += _modelparams.loss.loss(&_builders[count]._neural_output,
-          example.m_label, _favor_metric, _against_metric, _neural_metric, example_num);
+          example.m_stance, _favor_metric, _against_metric, _neural_metric, example_num);
     }
     _cg.backward();
 
@@ -145,7 +145,7 @@ public:
     _cg.compute();
 
     dtype cost = _modelparams.loss.cost(&_builders[0]._neural_output,
-        example.m_label, 1);
+        example.m_stance, 1);
 
     return cost;
   }
