@@ -152,6 +152,12 @@ void readLineToInstance(const string &line, Instance *instance) {
 		string word = normalize_to_lowerwithdigit(rawword);
 		if (word == "rt" || word == "via" || word == "#semst") continue;
 		if (isPunctuation(word)) continue;
+
+		std::string http = "http";
+		if (!word.compare(0, http.size(), http)) {
+			continue;
+		}
+
 		words.push_back(word);
 	}
 
