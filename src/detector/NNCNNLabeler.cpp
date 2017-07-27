@@ -175,9 +175,6 @@ void Classifier::train(const string &trainFile, const string &devFile,
 
 	dtype bestDIS = 0;
 
-	int inputSize = trainExamples.size();
-
-
 	srand(0);
 
 	static vector<Example> subExamples;
@@ -195,8 +192,8 @@ void Classifier::train(const string &trainFile, const string &devFile,
 			subExamples.clear();
 			int start_pos = updateIter * m_options.batchSize;
 			int end_pos = (updateIter + 1) * m_options.batchSize;
-			if (end_pos > inputSize)
-				end_pos = inputSize;
+			if (end_pos > indexes.size())
+				end_pos = indexes.size();
 
 			for (int idy = start_pos; idy < end_pos; idy++) {
 				subExamples.push_back(trainExamples[indexes[idy]]);
