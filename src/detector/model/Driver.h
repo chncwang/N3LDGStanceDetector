@@ -12,6 +12,7 @@
 #include "ComputionGraph.h"
 #include "Stance.h"
 #include "MySoftMaxLoss.h"
+#include "Targets.h"
 
 //A native neural network classfier using only word embeddings
 
@@ -134,7 +135,11 @@ public:
     _cg.compute();
 
 	int intResult;
-    _modelparams.loss.predict(&_builders[0]._neural_output, intResult);
+	int excludedClass = isTargetWordInTweet(feature) ? -1 : Stance::NONE;
+    _modelparams.loss.predict(&_builders[0]._neural_output, excludedClass, intResult);
+	if (excludedClass != -1) {
+		assert(intResult != Stance::NONE);
+	}
 
 	result = static_cast<Stance>(intResult);
   }
