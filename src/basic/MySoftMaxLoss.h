@@ -68,14 +68,18 @@ public:
 		return cost;
 	}
 
-	inline dtype predict(PNode x, int& y){
+	inline dtype predict(PNode x, int excludedClass, int& y){
+		assert(excludedClass >= -1 && excludedClass <= 2);
 		int nDim = x->dim;
 
 		int optLabel = -1;
 		for (int i = 0; i < nDim; ++i) {
 			if (optLabel < 0 || x->val[i] >  x->val[optLabel])
-				optLabel = i;
+				if (i != excludedClass) {
+					optLabel = i;
+				}
 		}
+		y = optLabel;
 
 		dtype prob = 0.0;
 		dtype sum = 0.0;
@@ -86,7 +90,6 @@ public:
 			sum += scores[i];
 		}
 		prob = scores[optLabel] / sum;
-		y = optLabel;
 		return prob;
 	}
 
@@ -107,7 +110,6 @@ public:
 				if (optLabel < 0 || x->val[i] > x->val[optLabel])
 					optLabel = i;
 		}
-
 		dtype sum1 = 0, sum2 = 0, maxScore = x->val[optLabel];
 		for (int i = 0; i < nDim; ++i) {
 			scores[i] = -1e10;
