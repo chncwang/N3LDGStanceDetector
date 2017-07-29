@@ -135,7 +135,7 @@ public:
     _cg.compute();
 
 	int intResult;
-	int excludedClass = isTargetWordInTweet(feature) ? -1 : Stance::NONE;
+	int excludedClass = isTargetWordInTweet(feature) ?  Stance::NONE : -1;
     _modelparams.loss.predict(&_builders[0]._neural_output, excludedClass, intResult);
 	if (excludedClass != -1) {
 		assert(intResult != Stance::NONE);
