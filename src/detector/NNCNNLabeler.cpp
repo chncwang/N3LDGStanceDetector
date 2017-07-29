@@ -182,7 +182,15 @@ void Classifier::train(const string &trainFile, const string &devFile,
 	int non_exceeds_time = 0;
 	for (int iter = 0; iter < m_options.maxIter; ++iter) {
 		std::cout << "##### Iteration " << iter << std::endl;
-		std::vector<int> indexes = getClassBalancedIndexes(trainExamples);
+		std::vector<int> indexes;
+		if (true) {
+			indexes = getClassBalancedIndexes(trainExamples);
+		}
+		else {
+			for (int i = 0; i < trainExamples.size(); ++i) {
+				indexes.push_back(i);
+			}
+		}
 		int batchBlock = indexes.size() / m_options.batchSize;
 		if (indexes.size() % m_options.batchSize != 0)
 			batchBlock++;
