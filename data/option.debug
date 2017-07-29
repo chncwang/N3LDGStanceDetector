@@ -1,11 +1,11 @@
-dropProb = 0.7
-batchSize = 16
-wordCutOff = 7
-wordEmbFineTune = true
+dropProb = -1
+batchSize = 1
+wordCutOff = 5
+wordEmbFineTune = false
 maxIter = 1000
 maxInstance = -1
 outBest = .debug
-hiddenSize = 60
+hiddenSize = 100
 wordFile = /home/wqs/w2v.txt
 wordEmbSize = 100
 adaAlpha = 0.0001
