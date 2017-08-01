@@ -35,7 +35,7 @@ public:
 		opts.labelSize = 3;
 		hidden_linear.initial(opts.hiddenSize, words.nDim, true, mem);
 		opts.inputSize = opts.hiddenSize * 2;
-		olayer_linear.initial(opts.labelSize, opts.inputSize, false, mem);
+		olayer_linear.initial(opts.labelSize, opts.inputSize, true, mem);
 		tweet_left_to_right_lstm_params.initial(opts.hiddenSize, opts.wordDim, mem);
 		tweet_right_to_left_lstm_params.initial(opts.hiddenSize, opts.wordDim, mem);
 		target_left_to_right_lstm_params.initial(opts.hiddenSize, opts.wordDim, mem);

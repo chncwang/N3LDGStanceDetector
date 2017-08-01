@@ -1,4 +1,4 @@
-dropProb = -1
+dropProb = 0.8
 batchSize = 1
 wordCutOff = 5
 wordEmbFineTune = false

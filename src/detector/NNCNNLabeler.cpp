@@ -190,6 +190,7 @@ void Classifier::train(const string &trainFile, const string &devFile,
 			for (int i = 0; i < trainExamples.size(); ++i) {
 				indexes.push_back(i);
 			}
+                        std::random_shuffle(indexes.begin(), indexes.end());
 		}
 		int batchBlock = indexes.size() / m_options.batchSize;
 		if (indexes.size() % m_options.batchSize != 0)
