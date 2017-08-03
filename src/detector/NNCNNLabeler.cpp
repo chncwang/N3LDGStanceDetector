@@ -190,12 +190,12 @@ void Classifier::train(const string &trainFile, const string &devFile,
 			for (int i = 0; i < trainExamples.size(); ++i) {
 				indexes.push_back(i);
 			}
-                        std::random_shuffle(indexes.begin(), indexes.end());
+			std::random_shuffle(indexes.begin(), indexes.end());
 		}
 		int batchBlock = indexes.size() / m_options.batchSize;
 		if (indexes.size() % m_options.batchSize != 0)
 			batchBlock++;
-		Metric favorMetric, againstMetric, neuralMetric;
+		Metric favorMetric, againstMetric, neuralMetric, overallMetric;
 		auto time_start = std::chrono::high_resolution_clock::now();
 		for (int updateIter = 0; updateIter < batchBlock; updateIter++) {
 			subExamples.clear();
@@ -233,11 +233,20 @@ void Classifier::train(const string &trainFile, const string &devFile,
 				neuralMetric.print();
 			}
 		}
+		float accuracy = static_cast<float>(favorMetric.correct_label_count + againstMetric.correct_label_count + neuralMetric.correct_label_count) /
+			(favorMetric.overall_label_count + againstMetric.overall_label_count + neuralMetric.overall_label_count);
+		std::cout << "train set acc:" << accuracy << std::endl;
+		if (accuracy >= 0.9) {
+			std::cout << "train set is good enough, stop" << std::endl;
+			exit(0);
+		}
+
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::cout << "Train finished. Total time taken is: "
 			<< std::chrono::duration<double>(time_end - time_start).count()
 			<< "s" << std::endl;
 
+		float devAvg = 0.0;
 		if (devNum > 0) {
 			Metric favor, against;
 			auto time_start = std::chrono::high_resolution_clock::now();
@@ -298,7 +307,8 @@ void Classifier::train(const string &trainFile, const string &devFile,
 				favor.print();
 				std::cout << "against:" << std::endl;
 				against.print();
-				std::cout << "avg f:" << (favor.getFMeasure() + against.getFMeasure()) * 0.5 << std::endl;
+				devAvg = (favor.getFMeasure() + against.getFMeasure()) * 0.5;
+				std::cout << "avg f:" << devAvg << std::endl;
 
 				/*if (!m_options.outBest.empty() && bCurIterBetter) {
 				m_pipe.outputAllInstances(testFile + m_options.outBest,
@@ -310,12 +320,10 @@ void Classifier::train(const string &trainFile, const string &devFile,
 			if (m_options.saveIntermediate && avgFMeasure > bestDIS) {
 				std::cout << "Exceeds best previous performance of " << bestDIS
 					<< " now is " << avgFMeasure << ". Saving model file.." << std::endl;
+				std::cout << "test and dev avg is " << (devAvg + avgFMeasure) * 0.5 << std::endl;
 				non_exceeds_time = 0;
 				bestDIS = avgFMeasure;
 				writeModelFile(modelFile);
-			}
-			else if (++non_exceeds_time > 10) {
-				std::cout << "iter:" << iter << " maybe reached best" << std::endl;
 			}
 		}
 		// Clear gradients
