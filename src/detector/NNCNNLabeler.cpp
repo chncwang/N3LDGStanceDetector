@@ -237,6 +237,13 @@ void Classifier::train(const string &trainFile, const string &devFile,
 		std::cout << "Train finished. Total time taken is: "
 			<< std::chrono::duration<double>(time_end - time_start).count()
 			<< "s" << std::endl;
+		float accuracy = static_cast<float>(favorMetric.correct_label_count + againstMetric.correct_label_count + neuralMetric.correct_label_count) /
+			(favorMetric.overall_label_count + againstMetric.overall_label_count + neuralMetric.overall_label_count);
+		std::cout << "train set acc:" << accuracy << std::endl;
+		if (accuracy >= 0.9) {
+			std::cout << "train set is good enough, stop" << std::endl;
+			exit(0);
+		}
 
 		if (devNum > 0) {
 			Metric favor, against;
@@ -265,8 +272,9 @@ void Classifier::train(const string &trainFile, const string &devFile,
 			favor.print();
 			std::cout << "against:" << std::endl;
 			against.print();
+			float devAvg = (favor.getFMeasure() + against.getFMeasure()) * 0.5;
 
-			if (!m_options.outBest.empty()  > bestDIS) {
+			if (!m_options.outBest.empty() > bestDIS) {
 				/*m_pipe.outputAllInstances(devFile + m_options.outBest,
 				decodeInstResults);*/
 				bCurIterBetter = true;
@@ -310,12 +318,10 @@ void Classifier::train(const string &trainFile, const string &devFile,
 			if (m_options.saveIntermediate && avgFMeasure > bestDIS) {
 				std::cout << "Exceeds best previous performance of " << bestDIS
 					<< " now is " << avgFMeasure << ". Saving model file.." << std::endl;
+				std::cout << "test and dev avg is " << (devAvg + avgFMeasure) * 0.5 << std::endl;
 				non_exceeds_time = 0;
 				bestDIS = avgFMeasure;
 				writeModelFile(modelFile);
-			}
-			else if (++non_exceeds_time > 10) {
-				std::cout << "iter:" << iter << " maybe reached best" << std::endl;
 			}
 		}
 		// Clear gradients
