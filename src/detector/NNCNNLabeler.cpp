@@ -272,7 +272,6 @@ void Classifier::train(const string &trainFile, const string &devFile,
 			favor.print();
 			std::cout << "against:" << std::endl;
 			against.print();
-			float devAvg = (favor.getFMeasure() + against.getFMeasure()) * 0.5;
 
 			if (!m_options.outBest.empty() > bestDIS) {
 				/*m_pipe.outputAllInstances(devFile + m_options.outBest,
@@ -280,6 +279,7 @@ void Classifier::train(const string &trainFile, const string &devFile,
 				bCurIterBetter = true;
 			}
 
+			float testAvg = 0;
 			if (testNum > 0) {
 				auto time_start = std::chrono::high_resolution_clock::now();
 				if (!m_options.outBest.empty())
@@ -306,7 +306,8 @@ void Classifier::train(const string &trainFile, const string &devFile,
 				favor.print();
 				std::cout << "against:" << std::endl;
 				against.print();
-				std::cout << "avg f:" << (favor.getFMeasure() + against.getFMeasure()) * 0.5 << std::endl;
+				testAvg = (favor.getFMeasure() + against.getFMeasure()) * 0.5;
+				std::cout << "avg f:" << testAvg << std::endl;
 
 				/*if (!m_options.outBest.empty() && bCurIterBetter) {
 				m_pipe.outputAllInstances(testFile + m_options.outBest,
@@ -318,7 +319,7 @@ void Classifier::train(const string &trainFile, const string &devFile,
 			if (m_options.saveIntermediate && avgFMeasure > bestDIS) {
 				std::cout << "Exceeds best previous performance of " << bestDIS
 					<< " now is " << avgFMeasure << ". Saving model file.." << std::endl;
-				std::cout << "test and dev avg is " << (devAvg + avgFMeasure) * 0.5 << std::endl;
+				std::cout << "test and dev avg is " << (testAvg + avgFMeasure) * 0.5 << std::endl;
 				non_exceeds_time = 0;
 				bestDIS = avgFMeasure;
 				writeModelFile(modelFile);
