@@ -233,6 +233,11 @@ void Classifier::train(const string &trainFile, const string &devFile,
 				neuralMetric.print();
 			}
 		}
+
+		auto time_end = std::chrono::high_resolution_clock::now();
+		std::cout << "Train finished. Total time taken is: "
+			<< std::chrono::duration<double>(time_end - time_start).count()
+			<< "s" << std::endl;
 		float accuracy = static_cast<float>(favorMetric.correct_label_count + againstMetric.correct_label_count + neuralMetric.correct_label_count) /
 			(favorMetric.overall_label_count + againstMetric.overall_label_count + neuralMetric.overall_label_count);
 		std::cout << "train set acc:" << accuracy << std::endl;
@@ -240,11 +245,6 @@ void Classifier::train(const string &trainFile, const string &devFile,
 			std::cout << "train set is good enough, stop" << std::endl;
 			exit(0);
 		}
-
-		auto time_end = std::chrono::high_resolution_clock::now();
-		std::cout << "Train finished. Total time taken is: "
-			<< std::chrono::duration<double>(time_end - time_start).count()
-			<< "s" << std::endl;
 
 		float devAvg = 0.0;
 		if (devNum > 0) {
@@ -281,6 +281,7 @@ void Classifier::train(const string &trainFile, const string &devFile,
 				bCurIterBetter = true;
 			}
 
+			float testAvg = 0;
 			if (testNum > 0) {
 				auto time_start = std::chrono::high_resolution_clock::now();
 				if (!m_options.outBest.empty())
@@ -307,8 +308,8 @@ void Classifier::train(const string &trainFile, const string &devFile,
 				favor.print();
 				std::cout << "against:" << std::endl;
 				against.print();
-				devAvg = (favor.getFMeasure() + against.getFMeasure()) * 0.5;
-				std::cout << "avg f:" << devAvg << std::endl;
+				testAvg = (favor.getFMeasure() + against.getFMeasure()) * 0.5;
+				std::cout << "avg f:" << testAvg << std::endl;
 
 				/*if (!m_options.outBest.empty() && bCurIterBetter) {
 				m_pipe.outputAllInstances(testFile + m_options.outBest,
@@ -320,7 +321,7 @@ void Classifier::train(const string &trainFile, const string &devFile,
 			if (m_options.saveIntermediate && avgFMeasure > bestDIS) {
 				std::cout << "Exceeds best previous performance of " << bestDIS
 					<< " now is " << avgFMeasure << ". Saving model file.." << std::endl;
-				std::cout << "test and dev avg is " << (devAvg + avgFMeasure) * 0.5 << std::endl;
+				std::cout << "laozhongyi_" << (testAvg + avgFMeasure) * 0.5 << std::endl;
 				non_exceeds_time = 0;
 				bestDIS = avgFMeasure;
 				writeModelFile(modelFile);
