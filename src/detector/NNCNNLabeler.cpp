@@ -6,118 +6,116 @@
 #include "Reader.h"
 
 Classifier::Classifier(int memsize) : m_driver(memsize) {
-	srand(0);
+  srand(0);
 }
 
 Classifier::~Classifier() {
 }
 
 int Classifier::createAlphabet(const vector<Instance> &vecInsts) {
-	if (vecInsts.size() == 0) {
-		std::cout << "training set empty" << std::endl;
-		return -1;
-	}
-	std::cout << "Creating Alphabet..." << endl;
+  if (vecInsts.size() == 0) {
+    std::cout << "training set empty" << std::endl;
+    return -1;
+  }
+  std::cout << "Creating Alphabet..." << endl;
 
-	int numInstance;
+  int numInstance;
 
-	for (numInstance = 0; numInstance < vecInsts.size(); numInstance++) {
-		const Instance *pInstance = &vecInsts[numInstance];
+  for (numInstance = 0; numInstance < vecInsts.size(); numInstance++) {
+    const Instance *pInstance = &vecInsts[numInstance];
 
-		vector<const string *> words;
-		for (const string &w : pInstance->m_target_words) {
-			words.push_back(&w);
-		}
+    vector<const string *> words;
+    for (const string &w : pInstance->m_target_words) {
+      words.push_back(&w);
+    }
 
-		for (const string &w : pInstance->m_tweet_words) {
-			words.push_back(&w);
-		}
+    for (const string &w : pInstance->m_tweet_words) {
+      words.push_back(&w);
+    }
 
-		for (const string *w : words) {
-			string normalizedWord = normalize_to_lowerwithdigit(*w);
+    for (const string *w : words) {
+      string normalizedWord = normalize_to_lowerwithdigit(*w);
 
-			if (m_word_stats.find(normalizedWord) == m_word_stats.end()) {
-				m_word_stats.insert(std::pair<std::string, int>(normalizedWord, 0));
-			}
-			else {
-				m_word_stats.at(normalizedWord) += 1;
-			}
-		}
+      if (m_word_stats.find(normalizedWord) == m_word_stats.end()) {
+        m_word_stats.insert(std::pair<std::string, int>(normalizedWord, 0));
+      }
+      else {
+        m_word_stats.at(normalizedWord) += 1;
+      }
+    }
 
-		if ((numInstance + 1) % m_options.verboseIter == 0) {
-			cout << numInstance + 1 << " ";
-			if ((numInstance + 1) % (40 * m_options.verboseIter) == 0)
-				cout << std::endl;
-			cout.flush();
-		}
+    if ((numInstance + 1) % m_options.verboseIter == 0) {
+      cout << numInstance + 1 << " ";
+      if ((numInstance + 1) % (40 * m_options.verboseIter) == 0)
+        cout << std::endl;
+      cout.flush();
+    }
 
-		if (m_options.maxInstance > 0 && numInstance == m_options.maxInstance)
-			break;
-	}
-	std::cout << numInstance << " " << endl;
+    if (m_options.maxInstance > 0 && numInstance == m_options.maxInstance)
+      break;
+  }
+  std::cout << numInstance << " " << endl;
 
-	return 0;
+  return 0;
 }
 
 int Classifier::addTestAlpha(const vector<Instance> &vecInsts) {
-	std::cout << "Adding word Alphabet..." << endl;
-	int numInstance;
-	for (numInstance = 0; numInstance < vecInsts.size(); numInstance++) {
-		const Instance *pInstance = &vecInsts[numInstance];
+  std::cout << "Adding word Alphabet..." << endl;
+  int numInstance;
+  for (numInstance = 0; numInstance < vecInsts.size(); numInstance++) {
+    const Instance *pInstance = &vecInsts[numInstance];
 
-		vector<const string *> words;
-		for (const string &w : pInstance->m_target_words) {
-			words.push_back(&w);
-		}
+    vector<const string *> words;
+    for (const string &w : pInstance->m_target_words) {
+      words.push_back(&w);
+    }
 
-		for (const string &w : pInstance->m_tweet_words) {
-			words.push_back(&w);
-		}
+    for (const string &w : pInstance->m_tweet_words) {
+      words.push_back(&w);
+    }
 
-		for (const string *w : words) {
-			string normalizedWord = normalize_to_lowerwithdigit(*w);
+    for (const string *w : words) {
+      string normalizedWord = normalize_to_lowerwithdigit(*w);
 
-			if (m_word_stats.find(normalizedWord) == m_word_stats.end()) {
-				m_word_stats.insert(std::pair<std::string, int>(normalizedWord, 0));
-			}
-			else {
-				m_word_stats.at(normalizedWord) += 1;
-			}
-		}
+      if (m_word_stats.find(normalizedWord) == m_word_stats.end()) {
+        m_word_stats.insert(std::pair<std::string, int>(normalizedWord, 0));
+      }
+      else {
+        m_word_stats.at(normalizedWord) += 1;
+      }
+    }
 
-		if (m_options.maxInstance > 0 && numInstance == m_options.maxInstance)
-			break;
-	}
-	cout << numInstance << " " << endl;
+    if (m_options.maxInstance > 0 && numInstance == m_options.maxInstance)
+      break;
+  }
+  cout << numInstance << " " << endl;
 
-	return 0;
+  return 0;
 }
 
 
 void Classifier::extractFeature(Feature &feat, const Instance *pInstance) {
-	feat.m_tweet_words = pInstance->m_tweet_words;
-	feat.m_target_words = pInstance->m_target_words;
-	feat.m_sparse_feats = pInstance->m_sparse_feats;
+  feat.m_tweet_words = pInstance->m_tweet_words;
+  feat.m_target_words = pInstance->m_target_words;
+  feat.m_sparse_feats = pInstance->m_sparse_feats;
 }
 
 void Classifier::convert2Example(const Instance *pInstance, Example &exam) {
-	vector<dtype> stanceVector = { 0, 0, 0 };
-	stanceVector.at(pInstance->m_stance) = 1;
-	exam.m_label = stanceVector;
-	Feature feature;
-	extractFeature(feature, pInstance);
-	exam.m_feature = feature;
+  exam.m_stance = pInstance->m_stance;
+  Feature feature;
+  extractFeature(feature, pInstance);
+  exam.m_feature = feature;
 }
 
 void Classifier::initialExamples(const vector<Instance> &vecInsts,
-	vector<Example> &vecExams) {
-	int numInstance;
-	for (numInstance = 0; numInstance < vecInsts.size(); numInstance++) {
-		const Instance *pInstance = &vecInsts[numInstance];
-		Example curExam;
-		convert2Example(pInstance, curExam);
-		vecExams.push_back(curExam);
-	}
+    vector<Example> &vecExams) {
+  int numInstance;
+  for (numInstance = 0; numInstance < vecInsts.size(); numInstance++) {
+    const Instance *pInstance = &vecInsts[numInstance];
+    Example curExam;
+    convert2Example(pInstance, curExam);
+    vecExams.push_back(curExam);
+  }
 }
 
 void Classifier::train(const string &trainFile, const string &devFile,
@@ -177,216 +175,220 @@ void Classifier::train(const string &trainFile, const string &devFile,
 
 	dtype bestDIS = 0;
 
-	int inputSize = trainExamples.size();
+  srand(0);
 
-	int batchBlock = inputSize / m_options.batchSize;
-	if (inputSize % m_options.batchSize != 0)
-		batchBlock++;
+  static vector<Example> subExamples;
+  int devNum = devExamples.size(), testNum = testExamples.size();
+  int non_exceeds_time = 0;
+  for (int iter = 0; iter < m_options.maxIter; ++iter) {
+    std::cout << "##### Iteration " << iter << std::endl;
+    std::vector<int> indexes;
+    if (false) {
+      indexes = getClassBalancedIndexes(trainExamples);
+    }
+    else {
+      for (int i = 0; i < trainExamples.size(); ++i) {
+        indexes.push_back(i);
+      }
+      std::random_shuffle(indexes.begin(), indexes.end());
+    }
+    int batchBlock = indexes.size() / m_options.batchSize;
+    if (indexes.size() % m_options.batchSize != 0)
+      batchBlock++;
+    Metric favorMetric, againstMetric, neuralMetric, overallMetric;
+    auto time_start = std::chrono::high_resolution_clock::now();
+    for (int updateIter = 0; updateIter < batchBlock; updateIter++) {
+      subExamples.clear();
+      int start_pos = updateIter * m_options.batchSize;
+      int end_pos = (updateIter + 1) * m_options.batchSize;
+      if (end_pos > indexes.size())
+        end_pos = indexes.size();
 
-	srand(0);
-	std::vector<int> indexes;
-	for (int i = 0; i < inputSize; ++i)
-		indexes.push_back(i);
+      for (int idy = start_pos; idy < end_pos; idy++) {
+        subExamples.push_back(trainExamples[indexes[idy]]);
+      }
 
-	static vector<Example> subExamples;
-	int devNum = devExamples.size(), testNum = testExamples.size();
-	int non_exceeds_time = 0;
-	for (int iter = 0; iter < m_options.maxIter; ++iter) {
-		std::cout << "##### Iteration " << iter << std::endl;
+      int curUpdateIter = iter * batchBlock + updateIter;
+      dtype cost = m_driver.train(subExamples, curUpdateIter);
 
-		random_shuffle(indexes.begin(), indexes.end());
-		Metric favorMetric, againstMetric, neuralMetric;
-		auto time_start = std::chrono::high_resolution_clock::now();
-		for (int updateIter = 0; updateIter < batchBlock; updateIter++) {
-			subExamples.clear();
-			int start_pos = updateIter * m_options.batchSize;
-			int end_pos = (updateIter + 1) * m_options.batchSize;
-			if (end_pos > inputSize)
-				end_pos = inputSize;
+      favorMetric.overall_label_count += m_driver._favor_metric.overall_label_count;
+      favorMetric.correct_label_count += m_driver._favor_metric.correct_label_count;
+      favorMetric.predicated_label_count += m_driver._favor_metric.predicated_label_count;
+      againstMetric.overall_label_count += m_driver._against_metric.overall_label_count;
+      againstMetric.correct_label_count += m_driver._against_metric.correct_label_count;
+      againstMetric.predicated_label_count += m_driver._against_metric.predicated_label_count;
+      neuralMetric.overall_label_count += m_driver._neural_metric.overall_label_count;
+      neuralMetric.correct_label_count += m_driver._neural_metric.correct_label_count;
+      neuralMetric.predicated_label_count += m_driver._neural_metric.predicated_label_count;
+      m_driver.updateModel();
 
-			for (int idy = start_pos; idy < end_pos; idy++) {
-				subExamples.push_back(trainExamples[indexes[idy]]);
-			}
+      if (updateIter % 10 == 1) {
+        std::cout << "current: " << updateIter + 1 << ", total block: "
+          << batchBlock << std::endl;
+        std::cout << "favor:" << std::endl;
+        favorMetric.print();
+        std::cout << "against:" << std::endl;
+        againstMetric.print();
+        std::cout << "neural:" << std::endl;
+        neuralMetric.print();
+      }
+    }
 
-			int curUpdateIter = iter * batchBlock + updateIter;
-			dtype cost = m_driver.train(subExamples, curUpdateIter);
+    auto time_end = std::chrono::high_resolution_clock::now();
+    std::cout << "Train finished. Total time taken is: "
+      << std::chrono::duration<double>(time_end - time_start).count()
+      << "s" << std::endl;
+    float accuracy = static_cast<float>(favorMetric.correct_label_count + againstMetric.correct_label_count + neuralMetric.correct_label_count) /
+      (favorMetric.overall_label_count + againstMetric.overall_label_count + neuralMetric.overall_label_count);
+    std::cout << "train set acc:" << accuracy << std::endl;
+    if (accuracy >= 0.9) {
+      std::cout << "train set is good enough, stop" << std::endl;
+      exit(0);
+    }
 
-			favorMetric.overall_label_count += m_driver._favor_metric.overall_label_count;
-			favorMetric.correct_label_count += m_driver._favor_metric.correct_label_count;
-			favorMetric.predicated_label_count += m_driver._favor_metric.predicated_label_count;
-			againstMetric.overall_label_count += m_driver._against_metric.overall_label_count;
-			againstMetric.correct_label_count += m_driver._against_metric.correct_label_count;
-			againstMetric.predicated_label_count += m_driver._against_metric.predicated_label_count;
-			neuralMetric.overall_label_count += m_driver._neural_metric.overall_label_count;
-			neuralMetric.correct_label_count += m_driver._neural_metric.correct_label_count;
-			neuralMetric.predicated_label_count += m_driver._neural_metric.predicated_label_count;
-			m_driver.updateModel();
+    float devAvg = 0.0;
+    if (devNum > 0) {
+      Metric favor, against;
+      auto time_start = std::chrono::high_resolution_clock::now();
+      bCurIterBetter = false;
+      if (!m_options.outBest.empty())
+        decodeInstResults.clear();
+      for (int idx = 0; idx < devExamples.size(); idx++) {
+        Stance result = predict(devExamples[idx].m_feature);
 
-			if (updateIter % 10 == 1) {
-				std::cout << "current: " << updateIter + 1 << ", total block: "
-					<< batchBlock << std::endl;
-				std::cout << "favor:" << std::endl;
-				favorMetric.print();
-				std::cout << "against:" << std::endl;
-				againstMetric.print();
-				std::cout << "neural:" << std::endl;
-				neuralMetric.print();
-			}
-		}
-		auto time_end = std::chrono::high_resolution_clock::now();
-		std::cout << "Train finished. Total time taken is: "
-			<< std::chrono::duration<double>(time_end - time_start).count()
-			<< "s" << std::endl;
-		float accuracy = static_cast<float>(favorMetric.correct_label_count + againstMetric.correct_label_count + neuralMetric.correct_label_count) /
-			(favorMetric.overall_label_count + againstMetric.overall_label_count + neuralMetric.overall_label_count);
-		std::cout << "train set acc:" << accuracy << std::endl;
-		if (accuracy >= 0.75) {
-			std::cout << "train set is good enough, stop" << std::endl;
-			exit(0);
-		}
+        devInsts[idx].evaluate(result, favor, against);
 
-		if (devNum > 0) {
-			Metric favor, against;
-			auto time_start = std::chrono::high_resolution_clock::now();
-			bCurIterBetter = false;
-			if (!m_options.outBest.empty())
-				decodeInstResults.clear();
-			for (int idx = 0; idx < devExamples.size(); idx++) {
-				Stance result = predict(devExamples[idx].m_feature);
+        if (!m_options.outBest.empty()) {
+          curDecodeInst.copyValuesFrom(devInsts[idx]);
+          //curDecodeInst.assignLabel(result_label);
+          decodeInstResults.push_back(curDecodeInst);
+        }
+      }
 
-				devInsts[idx].evaluate(result, favor, against);
+      auto time_end = std::chrono::high_resolution_clock::now();
+      std::cout << "Dev finished. Total time taken is: "
+        << std::chrono::duration<double>(time_end - time_start).count()
+        << "s" << std::endl;
+      std::cout << "dev:" << std::endl;
+      std::cout << "favor:" << std::endl;
+      favor.print();
+      std::cout << "against:" << std::endl;
+      against.print();
 
-				if (!m_options.outBest.empty()) {
-					curDecodeInst.copyValuesFrom(devInsts[idx]);
-					//curDecodeInst.assignLabel(result_label);
-					decodeInstResults.push_back(curDecodeInst);
-				}
-			}
+      if (!m_options.outBest.empty() > bestDIS) {
+        /*m_pipe.outputAllInstances(devFile + m_options.outBest,
+          decodeInstResults);*/
+        bCurIterBetter = true;
+      }
 
-			auto time_end = std::chrono::high_resolution_clock::now();
-			std::cout << "Dev finished. Total time taken is: "
-				<< std::chrono::duration<double>(time_end - time_start).count()
-				<< "s" << std::endl;
-			std::cout << "dev:" << std::endl;
-			std::cout << "favor:" << std::endl;
-			favor.print();
-			std::cout << "against:" << std::endl;
-			against.print();
+      float testAvg = 0;
+      if (testNum > 0) {
+        auto time_start = std::chrono::high_resolution_clock::now();
+        if (!m_options.outBest.empty())
+          decodeInstResults.clear();
+        Metric favor, against;
+        for (int idx = 0; idx < testExamples.size(); idx++) {
+          Stance stance = predict(testExamples[idx].m_feature);
 
-			if (!m_options.outBest.empty() > bestDIS) {
-				/*m_pipe.outputAllInstances(devFile + m_options.outBest,
-				decodeInstResults);*/
-				bCurIterBetter = true;
-			}
+          testInsts[idx].evaluate(stance, favor, against);
 
-			float testAvg = 0;
-			if (testNum > 0) {
-				auto time_start = std::chrono::high_resolution_clock::now();
-				if (!m_options.outBest.empty())
-					decodeInstResults.clear();
-				Metric favor, against;
-				for (int idx = 0; idx < testExamples.size(); idx++) {
-					Stance stance = predict(testExamples[idx].m_feature);
+          if (bCurIterBetter && !m_options.outBest.empty()) {
+            curDecodeInst.copyValuesFrom(testInsts[idx]);
+            //curDecodeInst.assignLabel(result_label);
+            decodeInstResults.push_back(curDecodeInst);
+          }
+        }
 
-					testInsts[idx].evaluate(stance, favor, against);
+        auto time_end = std::chrono::high_resolution_clock::now();
+        std::cout << "Test finished. Total time taken is: "
+          << std::chrono::duration<double>(
+              time_end - time_start).count() << "s" << std::endl;
+        std::cout << "test:" << std::endl;
+        std::cout << "favor:" << std::endl;
+        favor.print();
+        std::cout << "against:" << std::endl;
+        against.print();
+        testAvg = (favor.getFMeasure() + against.getFMeasure()) * 0.5;
+        std::cout << "avg f:" << testAvg << std::endl;
 
-					if (bCurIterBetter && !m_options.outBest.empty()) {
-						curDecodeInst.copyValuesFrom(testInsts[idx]);
-						//curDecodeInst.assignLabel(result_label);
-						decodeInstResults.push_back(curDecodeInst);
-					}
-				}
+        /*if (!m_options.outBest.empty() && bCurIterBetter) {
+          m_pipe.outputAllInstances(testFile + m_options.outBest,
+          decodeInstResults);
+          }*/
+      }
 
-				auto time_end = std::chrono::high_resolution_clock::now();
-				std::cout << "Test finished. Total time taken is: "
-					<< std::chrono::duration<double>(
-						time_end - time_start).count() << "s" << std::endl;
-				std::cout << "test:" << std::endl;
-				std::cout << "favor:" << std::endl;
-				favor.print();
-				std::cout << "against:" << std::endl;
-				against.print();
-				testAvg = (favor.getFMeasure() + against.getFMeasure()) * 0.5;
-				std::cout << "avg f:" << testAvg << std::endl;
-
-				/*if (!m_options.outBest.empty() && bCurIterBetter) {
-				m_pipe.outputAllInstances(testFile + m_options.outBest,
-				decodeInstResults);
-				}*/
-			}
-
-			double avgFMeasure = (favor.getFMeasure() + against.getFMeasure()) * 0.5;
-			if (m_options.saveIntermediate && avgFMeasure > bestDIS) {
-				std::cout << "Exceeds best previous performance of " << bestDIS
-					<< " now is " << avgFMeasure << ". Saving model file.." << std::endl;
-				std::cout << "laozhongyi_" << (testAvg + avgFMeasure) * 0.5 << std::endl;
-				non_exceeds_time = 0;
-				bestDIS = avgFMeasure;
-				writeModelFile(modelFile);
-			}
-		}
-		// Clear gradients
-	}
+      double avgFMeasure = (favor.getFMeasure() + against.getFMeasure()) * 0.5;
+      if (m_options.saveIntermediate && avgFMeasure > bestDIS) {
+        std::cout << "Exceeds best previous performance of " << bestDIS
+          << " now is " << avgFMeasure << ". Saving model file.." << std::endl;
+        std::cout << "laozhongyi_" << avgFMeasure << std::endl;
+        non_exceeds_time = 0;
+        bestDIS = avgFMeasure;
+        writeModelFile(modelFile);
+      }
+    }
+    // Clear gradients
+  }
 }
 
 Stance Classifier::predict(const Feature &feature) {
-	//assert(features.size() == words.size());
-	Stance stance;
-	m_driver.predict(feature, stance);
-	return stance;
+  //assert(features.size() == words.size());
+  Stance stance;
+  m_driver.predict(feature, stance);
+  return stance;
 }
 
 void Classifier::test(const string &testFile, const string &outputFile,
-	const string &modelFile) {
-	loadModelFile(modelFile);
-	m_driver.TestInitial();
-	vector<Instance> testInsts = readInstancesFromFile(testFile);
+    const string &modelFile) {
+  loadModelFile(modelFile);
+  m_driver.TestInitial();
+  vector<Instance> testInsts = readInstancesFromFile(testFile);
 
-	vector<Example> testExamples;
-	initialExamples(testInsts, testExamples);
+  vector<Example> testExamples;
+  initialExamples(testInsts, testExamples);
 
-	int testNum = testExamples.size();
-	vector<Instance> testInstResults;
-	Metric favor, against;
-	for (int idx = 0; idx < testExamples.size(); idx++) {
-		Stance stance = predict(testExamples[idx].m_feature);
-		testInsts[idx].evaluate(stance, favor, against);
-		Instance curResultInst;
-		curResultInst.copyValuesFrom(testInsts[idx]);
-		//curResultInst.assignLabel(result_label);
-		testInstResults.push_back(curResultInst);
-	}
-	std::cout << "test:" << std::endl;
-	std::cout << "favor:" << std::endl;
-	favor.print();
-	std::cout << "against:" << std::endl;
-	against.print();
+  int testNum = testExamples.size();
+  vector<Instance> testInstResults;
+  Metric favor, against;
+  for (int idx = 0; idx < testExamples.size(); idx++) {
+    Stance stance = predict(testExamples[idx].m_feature);
+    testInsts[idx].evaluate(stance, favor, against);
+    Instance curResultInst;
+    curResultInst.copyValuesFrom(testInsts[idx]);
+    //curResultInst.assignLabel(result_label);
+    testInstResults.push_back(curResultInst);
+  }
+  std::cout << "test:" << std::endl;
+  std::cout << "favor:" << std::endl;
+  favor.print();
+  std::cout << "against:" << std::endl;
+  against.print();
 
-	//m_pipe.outputAllInstances(outputFile, testInstResults);
+  //m_pipe.outputAllInstances(outputFile, testInstResults);
 }
 
 
 void Classifier::loadModelFile(const string &inputModelFile) {
-	ifstream is(inputModelFile);
-	if (is.is_open()) {
-		m_driver._hyperparams.loadModel(is);
-		m_driver._modelparams.loadModel(is, &m_driver._aligned_mem);
-		is.close();
-	}
-	else
-		std::cout << "load model error" << endl;
+  ifstream is(inputModelFile);
+  if (is.is_open()) {
+    m_driver._hyperparams.loadModel(is);
+    m_driver._modelparams.loadModel(is, &m_driver._aligned_mem);
+    is.close();
+  }
+  else
+    std::cout << "load model error" << endl;
 }
 
 void Classifier::writeModelFile(const string &outputModelFile) {
-	ofstream os(outputModelFile);
-	if (os.is_open()) {
-		m_driver._hyperparams.saveModel(os);
-		m_driver._modelparams.saveModel(os);
-		os.close();
-		std::cout << "write model ok. " << endl;
-	}
-	else
-		std::cout << "open output file error" << endl;
+  ofstream os(outputModelFile);
+  if (os.is_open()) {
+    m_driver._hyperparams.saveModel(os);
+    m_driver._modelparams.saveModel(os);
+    os.close();
+    std::cout << "write model ok. " << endl;
+  }
+  else
+    std::cout << "open output file error" << endl;
 }
 
 #include "Targets.h"
@@ -411,41 +413,41 @@ void Classifier::writeModelFile(const string &outputModelFile) {
 
 
 int main(int argc, char *argv[]) {
-	std::string trainFile = "", devFile = "", testFile = "", modelFile = "", optionFile = "";
-	std::string outputFile = "";
-	bool bTrain = false;
-	int memsize = 0;
-	dsr::Argument_helper ah;
+  std::string trainFile = "", devFile = "", testFile = "", modelFile = "", optionFile = "";
+  std::string outputFile = "";
+  bool bTrain = false;
+  int memsize = 0;
+  dsr::Argument_helper ah;
 
-	ah.new_flag("l", "learn", "train or test", bTrain);
-	ah.new_named_string("train", "trainCorpus", "named_string",
-		"training corpus to train a model, must when training", trainFile);
-	ah.new_named_string("dev", "devCorpus", "named_string",
-		"development corpus to train a model, optional when training", devFile);
-	ah.new_named_string("test", "testCorpus", "named_string",
-		"testing corpus to train a model or input file to test a model, optional when training and must when testing",
-		testFile);
-	ah.new_named_string("model", "modelFile", "named_string",
-		"model file, must when training and testing", modelFile);
-	ah.new_named_string("option", "optionFile", "named_string",
-		"option file to train a model, optional when training", optionFile);
-	ah.new_named_string("output", "outputFile", "named_string",
-		"output file to test, must when testing", outputFile);
-	ah.new_named_int("memsize", "memorySize", "named_int",
-		"This argument decides the size of static memory allocation", memsize);
+  ah.new_flag("l", "learn", "train or test", bTrain);
+  ah.new_named_string("train", "trainCorpus", "named_string",
+      "training corpus to train a model, must when training", trainFile);
+  ah.new_named_string("dev", "devCorpus", "named_string",
+      "development corpus to train a model, optional when training", devFile);
+  ah.new_named_string("test", "testCorpus", "named_string",
+      "testing corpus to train a model or input file to test a model, optional when training and must when testing",
+      testFile);
+  ah.new_named_string("model", "modelFile", "named_string",
+      "model file, must when training and testing", modelFile);
+  ah.new_named_string("option", "optionFile", "named_string",
+      "option file to train a model, optional when training", optionFile);
+  ah.new_named_string("output", "outputFile", "named_string",
+      "output file to test, must when testing", outputFile);
+  ah.new_named_int("memsize", "memorySize", "named_int",
+      "This argument decides the size of static memory allocation", memsize);
 
-	ah.process(argc, argv);
+  ah.process(argc, argv);
 
-	if (memsize < 0)
-		memsize = 0;
-	Classifier the_classifier(memsize);
-	if (bTrain) {
-		the_classifier.train(trainFile, devFile, testFile, modelFile, optionFile);
-	}
-	else {
-		the_classifier.test(testFile, outputFile, modelFile);
-	}
-	//getchar();
-	//test(argv);
-	//ah.write_values(std::cout);
+  if (memsize < 0)
+    memsize = 0;
+  Classifier the_classifier(memsize);
+  if (bTrain) {
+    the_classifier.train(trainFile, devFile, testFile, modelFile, optionFile);
+  }
+  else {
+    the_classifier.test(testFile, outputFile, modelFile);
+  }
+  //getchar();
+  //test(argv);
+  //ah.write_values(std::cout);
 }
