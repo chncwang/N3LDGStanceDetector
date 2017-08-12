@@ -183,7 +183,7 @@ void Classifier::train(const string &trainFile, const string &devFile,
   for (int iter = 0; iter < m_options.maxIter; ++iter) {
     std::cout << "##### Iteration " << iter << std::endl;
     std::vector<int> indexes;
-    if (false) {
+    if (true) {
       indexes = getClassBalancedIndexes(trainExamples);
     }
     else {
@@ -241,7 +241,7 @@ void Classifier::train(const string &trainFile, const string &devFile,
     float accuracy = static_cast<float>(favorMetric.correct_label_count + againstMetric.correct_label_count + neuralMetric.correct_label_count) /
       (favorMetric.overall_label_count + againstMetric.overall_label_count + neuralMetric.overall_label_count);
     std::cout << "train set acc:" << accuracy << std::endl;
-    if (accuracy >= 0.9) {
+    if (accuracy >= 0.75) {
       std::cout << "train set is good enough, stop" << std::endl;
       exit(0);
     }
