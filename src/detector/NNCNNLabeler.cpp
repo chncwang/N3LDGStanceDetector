@@ -183,7 +183,7 @@ void Classifier::train(const string &trainFile, const string &devFile,
   for (int iter = 0; iter < m_options.maxIter; ++iter) {
     std::cout << "##### Iteration " << iter << std::endl;
     std::vector<int> indexes;
-    if (false) {
+    if (true) {
       indexes = getClassBalancedIndexes(trainExamples);
     }
     else {
