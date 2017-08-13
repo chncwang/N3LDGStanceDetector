@@ -128,7 +128,7 @@ void Classifier::train(const string &trainFile, const string &devFile,
 	vector<Instance> rawtrainInsts = readInstancesFromFile(trainFile);
 	vector<Instance> trainInsts;
 	for (Instance &ins : rawtrainInsts) {
-		if (ins.m_target_words.at(0) == "#hillaryclinton") {
+		if (ins.m_target_words.at(0) == "#hillaryclinton" || ins.m_target_words.at(0) == "hillary") {
 			continue;
 		}
 		trainInsts.push_back(ins);
