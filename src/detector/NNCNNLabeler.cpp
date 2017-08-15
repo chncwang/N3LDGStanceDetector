@@ -147,8 +147,10 @@ void Classifier::train(const string &trainFile, const string &devFile,
 	printStanceCount(testInsts);
 
 	createAlphabet(trainInsts);
-	addTestAlpha(devInsts);
-	addTestAlpha(testInsts);
+	if (!m_options.wordEmbFineTune) {
+		addTestAlpha(devInsts);
+		addTestAlpha(testInsts);
+	}
 
 	static vector<Instance> decodeInstResults;
 	static Instance curDecodeInst;
