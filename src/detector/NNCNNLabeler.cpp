@@ -119,6 +119,7 @@ void Classifier::initialExamples(const vector<Instance> &vecInsts,
 }
 
 void Classifier::train(const string &trainFile, const string &devFile,
+<<<<<<< HEAD
     const string &testFile, const string &modelFile,
     const string &optionFile) {
   if (optionFile != "")
@@ -133,49 +134,73 @@ void Classifier::train(const string &trainFile, const string &devFile,
     }
     trainInsts.push_back(ins);
   }
+=======
+	const string &testFile, const string &modelFile,
+	const string &optionFile) {
+	if (optionFile != "")
+		m_options.load(optionFile);
+	m_options.showOptions();
+>>>>>>> 1816e3539275cb997d86c8c3aae89557f0f03eb9
 
-  std::cout << "train instances:" << std::endl;
-  printStanceCount(trainInsts);
+	vector<Instance> rawtrainInsts = readInstancesFromFile(trainFile);
+	vector<Instance> trainInsts;
+	for (Instance &ins : rawtrainInsts) {
+		if (ins.m_target_words.at(0) == "#hillaryclinton" || ins.m_target_words.at(0) == "hillary") {
+			continue;
+		}
+		trainInsts.push_back(ins);
+	}
 
-  vector<Instance> devInsts = readInstancesFromFile(devFile);
-  std::cout << "dev instances:" << std::endl;
-  printStanceCount(devInsts);
-  vector<Instance> testInsts = readInstancesFromFile(testFile);
-  std::cout << "test instances:" << std::endl;
-  printStanceCount(testInsts);
+	std::cout << "train instances:" << std::endl;
+	printStanceCount(trainInsts);
 
+<<<<<<< HEAD
   createAlphabet(trainInsts);
 	if (!m_options.wordEmbFineTune) {
 		addTestAlpha(devInsts);
 		addTestAlpha(testInsts);
 	}
+=======
+	vector<Instance> devInsts = readInstancesFromFile(devFile);
+	std::cout << "dev instances:" << std::endl;
+	printStanceCount(devInsts);
+	vector<Instance> testInsts = readInstancesFromFile(testFile);
+	std::cout << "test instances:" << std::endl;
+	printStanceCount(testInsts);
+>>>>>>> 1816e3539275cb997d86c8c3aae89557f0f03eb9
 
-  static vector<Instance> decodeInstResults;
-  static Instance curDecodeInst;
-  bool bCurIterBetter = false;
+	createAlphabet(trainInsts);
+	if (!m_options.wordEmbFineTune) {
+		addTestAlpha(devInsts);
+		addTestAlpha(testInsts);
+	}
 
-  vector<Example> trainExamples, devExamples, testExamples;
+	static vector<Instance> decodeInstResults;
+	static Instance curDecodeInst;
+	bool bCurIterBetter = false;
 
-  initialExamples(trainInsts, trainExamples);
-  initialExamples(devInsts, devExamples);
-  initialExamples(testInsts, testExamples);
+	vector<Example> trainExamples, devExamples, testExamples;
 
-  m_word_stats[unknownkey] = m_options.wordCutOff + 1;
-  m_driver._modelparams.wordAlpha.initial(m_word_stats, m_options.wordCutOff);
+	initialExamples(trainInsts, trainExamples);
+	initialExamples(devInsts, devExamples);
+	initialExamples(testInsts, testExamples);
 
-  if (m_options.wordFile != "") {
-    m_driver._modelparams.words.initial(&m_driver._modelparams.wordAlpha,
-        m_options.wordFile, m_options.wordEmbFineTune);
-  }
-  else {
-    m_driver._modelparams.words.initial(&m_driver._modelparams.wordAlpha,
-        m_options.wordEmbSize, m_options.wordEmbFineTune);
-  }
+	m_word_stats[unknownkey] = m_options.wordCutOff + 1;
+	m_driver._modelparams.wordAlpha.initial(m_word_stats, m_options.wordCutOff);
 
-  m_driver._hyperparams.setRequared(m_options);
-  m_driver.initial();
+	if (m_options.wordFile != "") {
+		m_driver._modelparams.words.initial(&m_driver._modelparams.wordAlpha,
+			m_options.wordFile, m_options.wordEmbFineTune);
+	}
+	else {
+		m_driver._modelparams.words.initial(&m_driver._modelparams.wordAlpha,
+			m_options.wordEmbSize, m_options.wordEmbFineTune);
+	}
 
-  dtype bestDIS = 0;
+	m_driver._hyperparams.setRequared(m_options);
+	m_driver.initial();
+
+	dtype bestDIS = 0;
 
   srand(0);
 
@@ -243,7 +268,7 @@ void Classifier::train(const string &trainFile, const string &devFile,
     float accuracy = static_cast<float>(favorMetric.correct_label_count + againstMetric.correct_label_count + neuralMetric.correct_label_count) /
       (favorMetric.overall_label_count + againstMetric.overall_label_count + neuralMetric.overall_label_count);
     std::cout << "train set acc:" << accuracy << std::endl;
-    if (accuracy >= 0.9) {
+    if (accuracy >= 0.75) {
       std::cout << "train set is good enough, stop" << std::endl;
       exit(0);
     }

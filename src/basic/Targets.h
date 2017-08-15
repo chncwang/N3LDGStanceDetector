@@ -25,6 +25,7 @@ std::vector<vector<string> > getStanceTargetWordVectors() {
 }
 
 bool isTargetWordInTweet(const Feature &feature) {
+	abort(); //TODO
 	const std::string &firstWord = feature.m_target_words.at(0);
 	std::vector<std::string> keywords;
 	if (firstWord == "#hillaryclinton") {
