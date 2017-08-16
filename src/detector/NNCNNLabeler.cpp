@@ -119,28 +119,11 @@ void Classifier::initialExamples(const vector<Instance> &vecInsts,
 }
 
 void Classifier::train(const string &trainFile, const string &devFile,
-<<<<<<< HEAD
-    const string &testFile, const string &modelFile,
-    const string &optionFile) {
-  if (optionFile != "")
-    m_options.load(optionFile);
-  m_options.showOptions();
-
-  vector<Instance> rawtrainInsts = readInstancesFromFile(trainFile);
-  vector<Instance> trainInsts;
-  for (Instance &ins : rawtrainInsts) {
-    if (ins.m_target_words.at(0) == "#hillaryclinton") {
-      continue;
-    }
-    trainInsts.push_back(ins);
-  }
-=======
 	const string &testFile, const string &modelFile,
 	const string &optionFile) {
 	if (optionFile != "")
 		m_options.load(optionFile);
 	m_options.showOptions();
->>>>>>> 1816e3539275cb997d86c8c3aae89557f0f03eb9
 
 	vector<Instance> rawtrainInsts = readInstancesFromFile(trainFile);
 	vector<Instance> trainInsts;
@@ -154,20 +137,12 @@ void Classifier::train(const string &trainFile, const string &devFile,
 	std::cout << "train instances:" << std::endl;
 	printStanceCount(trainInsts);
 
-<<<<<<< HEAD
-  createAlphabet(trainInsts);
-	if (!m_options.wordEmbFineTune) {
-		addTestAlpha(devInsts);
-		addTestAlpha(testInsts);
-	}
-=======
 	vector<Instance> devInsts = readInstancesFromFile(devFile);
 	std::cout << "dev instances:" << std::endl;
 	printStanceCount(devInsts);
 	vector<Instance> testInsts = readInstancesFromFile(testFile);
 	std::cout << "test instances:" << std::endl;
 	printStanceCount(testInsts);
->>>>>>> 1816e3539275cb997d86c8c3aae89557f0f03eb9
 
 	createAlphabet(trainInsts);
 	if (!m_options.wordEmbFineTune) {
