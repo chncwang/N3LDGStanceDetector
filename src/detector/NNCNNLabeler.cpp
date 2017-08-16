@@ -9,8 +9,7 @@ Classifier::Classifier(int memsize) : m_driver(memsize) {
   srand(0);
 }
 
-Classifier::~Classifier() {
-}
+Classifier::~Classifier() {}
 
 int Classifier::createAlphabet(const vector<Instance> &vecInsts) {
   if (vecInsts.size() == 0) {
@@ -38,8 +37,7 @@ int Classifier::createAlphabet(const vector<Instance> &vecInsts) {
 
       if (m_word_stats.find(normalizedWord) == m_word_stats.end()) {
         m_word_stats.insert(std::pair<std::string, int>(normalizedWord, 0));
-      }
-      else {
+      } else {
         m_word_stats.at(normalizedWord) += 1;
       }
     }
@@ -79,8 +77,7 @@ int Classifier::addTestAlpha(const vector<Instance> &vecInsts) {
 
       if (m_word_stats.find(normalizedWord) == m_word_stats.end()) {
         m_word_stats.insert(std::pair<std::string, int>(normalizedWord, 0));
-      }
-      else {
+      } else {
         m_word_stats.at(normalizedWord) += 1;
       }
     }
@@ -108,7 +105,7 @@ void Classifier::convert2Example(const Instance *pInstance, Example &exam) {
 }
 
 void Classifier::initialExamples(const vector<Instance> &vecInsts,
-    vector<Example> &vecExams) {
+  vector<Example> &vecExams) {
   int numInstance;
   for (numInstance = 0; numInstance < vecInsts.size(); numInstance++) {
     const Instance *pInstance = &vecInsts[numInstance];
@@ -119,63 +116,62 @@ void Classifier::initialExamples(const vector<Instance> &vecInsts,
 }
 
 void Classifier::train(const string &trainFile, const string &devFile,
-	const string &testFile, const string &modelFile,
-	const string &optionFile) {
-	if (optionFile != "")
-		m_options.load(optionFile);
-	m_options.showOptions();
+  const string &testFile, const string &modelFile,
+  const string &optionFile) {
+  if (optionFile != "")
+    m_options.load(optionFile);
+  m_options.showOptions();
 
-	vector<Instance> rawtrainInsts = readInstancesFromFile(trainFile);
-	vector<Instance> trainInsts;
-	for (Instance &ins : rawtrainInsts) {
-		if (ins.m_target_words.at(0) == "#hillaryclinton" || ins.m_target_words.at(0) == "hillary") {
-			continue;
-		}
-		trainInsts.push_back(ins);
-	}
+  vector<Instance> rawtrainInsts = readInstancesFromFile(trainFile);
+  vector<Instance> trainInsts;
+  for (Instance &ins : rawtrainInsts) {
+    if (ins.m_target_words.at(0) == "#hillaryclinton" || ins.m_target_words.at(0) == "hillary") {
+      continue;
+    }
+    trainInsts.push_back(ins);
+  }
 
-	std::cout << "train instances:" << std::endl;
-	printStanceCount(trainInsts);
+  std::cout << "train instances:" << std::endl;
+  printStanceCount(trainInsts);
 
-	vector<Instance> devInsts = readInstancesFromFile(devFile);
-	std::cout << "dev instances:" << std::endl;
-	printStanceCount(devInsts);
-	vector<Instance> testInsts = readInstancesFromFile(testFile);
-	std::cout << "test instances:" << std::endl;
-	printStanceCount(testInsts);
+  vector<Instance> devInsts = readInstancesFromFile(devFile);
+  std::cout << "dev instances:" << std::endl;
+  printStanceCount(devInsts);
+  vector<Instance> testInsts = readInstancesFromFile(testFile);
+  std::cout << "test instances:" << std::endl;
+  printStanceCount(testInsts);
 
-	createAlphabet(trainInsts);
-	if (!m_options.wordEmbFineTune) {
-		addTestAlpha(devInsts);
-		addTestAlpha(testInsts);
-	}
+  createAlphabet(trainInsts);
+  if (!m_options.wordEmbFineTune) {
+    addTestAlpha(devInsts);
+    addTestAlpha(testInsts);
+  }
 
-	static vector<Instance> decodeInstResults;
-	static Instance curDecodeInst;
-	bool bCurIterBetter = false;
+  static vector<Instance> decodeInstResults;
+  static Instance curDecodeInst;
+  bool bCurIterBetter = false;
 
-	vector<Example> trainExamples, devExamples, testExamples;
+  vector<Example> trainExamples, devExamples, testExamples;
 
-	initialExamples(trainInsts, trainExamples);
-	initialExamples(devInsts, devExamples);
-	initialExamples(testInsts, testExamples);
+  initialExamples(trainInsts, trainExamples);
+  initialExamples(devInsts, devExamples);
+  initialExamples(testInsts, testExamples);
 
-	m_word_stats[unknownkey] = m_options.wordCutOff + 1;
-	m_driver._modelparams.wordAlpha.initial(m_word_stats, m_options.wordCutOff);
+  m_word_stats[unknownkey] = m_options.wordCutOff + 1;
+  m_driver._modelparams.wordAlpha.initial(m_word_stats, m_options.wordCutOff);
 
-	if (m_options.wordFile != "") {
-		m_driver._modelparams.words.initial(&m_driver._modelparams.wordAlpha,
-			m_options.wordFile, m_options.wordEmbFineTune);
-	}
-	else {
-		m_driver._modelparams.words.initial(&m_driver._modelparams.wordAlpha,
-			m_options.wordEmbSize, m_options.wordEmbFineTune);
-	}
+  if (m_options.wordFile != "") {
+    m_driver._modelparams.words.initial(&m_driver._modelparams.wordAlpha,
+      m_options.wordFile, m_options.wordEmbFineTune);
+  } else {
+    m_driver._modelparams.words.initial(&m_driver._modelparams.wordAlpha,
+      m_options.wordEmbSize, m_options.wordEmbFineTune);
+  }
 
-	m_driver._hyperparams.setRequared(m_options);
-	m_driver.initial();
+  m_driver._hyperparams.setRequared(m_options);
+  m_driver.initial();
 
-	dtype bestDIS = 0;
+  dtype bestDIS = 0;
 
   srand(0);
 
@@ -187,8 +183,7 @@ void Classifier::train(const string &trainFile, const string &devFile,
     std::vector<int> indexes;
     if (true) {
       indexes = getClassBalancedIndexes(trainExamples);
-    }
-    else {
+    } else {
       for (int i = 0; i < trainExamples.size(); ++i) {
         indexes.push_back(i);
       }
@@ -304,7 +299,7 @@ void Classifier::train(const string &trainFile, const string &devFile,
         auto time_end = std::chrono::high_resolution_clock::now();
         std::cout << "Test finished. Total time taken is: "
           << std::chrono::duration<double>(
-              time_end - time_start).count() << "s" << std::endl;
+            time_end - time_start).count() << "s" << std::endl;
         std::cout << "test:" << std::endl;
         std::cout << "favor:" << std::endl;
         favor.print();
@@ -341,7 +336,7 @@ Stance Classifier::predict(const Feature &feature) {
 }
 
 void Classifier::test(const string &testFile, const string &outputFile,
-    const string &modelFile) {
+  const string &modelFile) {
   loadModelFile(modelFile);
   m_driver.TestInitial();
   vector<Instance> testInsts = readInstancesFromFile(testFile);
@@ -376,8 +371,7 @@ void Classifier::loadModelFile(const string &inputModelFile) {
     m_driver._hyperparams.loadModel(is);
     m_driver._modelparams.loadModel(is, &m_driver._aligned_mem);
     is.close();
-  }
-  else
+  } else
     std::cout << "load model error" << endl;
 }
 
@@ -388,8 +382,7 @@ void Classifier::writeModelFile(const string &outputModelFile) {
     m_driver._modelparams.saveModel(os);
     os.close();
     std::cout << "write model ok. " << endl;
-  }
-  else
+  } else
     std::cout << "open output file error" << endl;
 }
 
@@ -423,20 +416,20 @@ int main(int argc, char *argv[]) {
 
   ah.new_flag("l", "learn", "train or test", bTrain);
   ah.new_named_string("train", "trainCorpus", "named_string",
-      "training corpus to train a model, must when training", trainFile);
+    "training corpus to train a model, must when training", trainFile);
   ah.new_named_string("dev", "devCorpus", "named_string",
-      "development corpus to train a model, optional when training", devFile);
+    "development corpus to train a model, optional when training", devFile);
   ah.new_named_string("test", "testCorpus", "named_string",
-      "testing corpus to train a model or input file to test a model, optional when training and must when testing",
-      testFile);
+    "testing corpus to train a model or input file to test a model, optional when training and must when testing",
+    testFile);
   ah.new_named_string("model", "modelFile", "named_string",
-      "model file, must when training and testing", modelFile);
+    "model file, must when training and testing", modelFile);
   ah.new_named_string("option", "optionFile", "named_string",
-      "option file to train a model, optional when training", optionFile);
+    "option file to train a model, optional when training", optionFile);
   ah.new_named_string("output", "outputFile", "named_string",
-      "output file to test, must when testing", outputFile);
+    "output file to test, must when testing", outputFile);
   ah.new_named_int("memsize", "memorySize", "named_int",
-      "This argument decides the size of static memory allocation", memsize);
+    "This argument decides the size of static memory allocation", memsize);
 
   ah.process(argc, argv);
 
@@ -445,8 +438,7 @@ int main(int argc, char *argv[]) {
   Classifier the_classifier(memsize);
   if (bTrain) {
     the_classifier.train(trainFile, devFile, testFile, modelFile, optionFile);
-  }
-  else {
+  } else {
     the_classifier.test(testFile, outputFile, modelFile);
   }
   //getchar();
