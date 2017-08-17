@@ -14,43 +14,6 @@ using namespace std;
 #include "Instance.h"
 #include "Targets.h"
 
-class Reader {
-public:
-  Reader() {}
-
-  virtual ~Reader() {
-    if (m_inf.is_open()) m_inf.close();
-  }
-  int startReading(const char *filename) {
-    if (m_inf.is_open()) {
-      m_inf.close();
-      m_inf.clear();
-    }
-    m_inf.open(filename);
-
-    if (!m_inf.is_open()) {
-      cout << "Reader::startReading() open file err: " << filename << endl;
-      return -1;
-    }
-
-    return 0;
-  }
-
-  void finishReading() {
-    if (m_inf.is_open()) {
-      m_inf.close();
-      m_inf.clear();
-    }
-  }
-  virtual Instance *getNext() = 0;
-protected:
-  ifstream m_inf;
-
-  int m_numInstance;
-
-  Instance m_instance;
-};
-
 vector<string> readLines(const string &fullFileName) {
   vector<string> lines;
   std::ifstream input(fullFileName);
@@ -61,7 +24,6 @@ vector<string> readLines(const string &fullFileName) {
 }
 
 void readLineToInstance(const string &line, Instance *instance) {
-  //cout << "Reader readLineToInstance line:" << line << endl;
   int tailIndex = -1;
   int i = 0;
   auto targetWordVectors = getStanceTargetWordVectors();
@@ -120,19 +82,6 @@ void readLineToInstance(const string &line, Instance *instance) {
   assert(index != string::npos);
 
   string substring = line.substr(tailIndex, index - tailIndex);
-  //std::cout << "Reader readLineToInstance substring:" << substring << endl;
-
-  //std::regex regex("[\s\t]+(.+)");
-  //std::smatch matcher;
-  //if (!std::regex_search(substring, matcher, regex)) {
-  //	//std::cout << "Reader readLineToInstance regex not found!" << endl;
-  //	std::cout << "substring:" << substring << std::endl;
-  //	assert(false);
-  //}
-
-  //string sentence = matcher.format("$1");
-  //std::cout << "Reader readLineToInstance sentence:" << sentence << "|||" << endl;
-
   vector<string> rawwords;
   boost::split(rawwords, substring, boost::is_any_of(" "));
   vector<string> words;
@@ -140,7 +89,6 @@ void readLineToInstance(const string &line, Instance *instance) {
     if (rawword.empty()) continue;
     string word = normalize_to_lowerwithdigit(rawword);
     if (word == "rt" || word == "via" || word == "#semst") continue;
-    //if (word == "thats" || word == "im" || word == "'s") continue;
     if (isPunctuation(word)) continue;
 
     std::string http = "http";
@@ -148,12 +96,25 @@ void readLineToInstance(const string &line, Instance *instance) {
       continue;
     }
 
+    assert(!word.empty());
     words.push_back(word);
+  }
+
+  for (int i = 0; i< words.size(); ++i) {
+    string &word = words.at(i);
+    if (word.at(0) != '#') {
+      for (int j = 0; j < i; ++j) {
+        string &w = words.at(j);
+        if (w.at(0) == '#') {
+          string symbol_removed = w.substr(1, w.size() - 1);
+          swap(symbol_removed, w);
+        }
+      }
+    }
   }
 
   assert(!words.empty());
 
-  //std::cout << instance->m_stance << std::endl;
   instance->m_tweet_words = move(words);
 }
 
