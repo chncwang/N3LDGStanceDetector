@@ -68,13 +68,16 @@ public:
 		return cost;
 	}
 
-	inline dtype predict(PNode x, int& y){
+        dtype predict(PNode x, int excludedClass, int& y) {
+          assert(excludedClass >= -1 && excludedClass <= 2);
 		int nDim = x->dim;
 
 		int optLabel = -1;
 		for (int i = 0; i < nDim; ++i) {
 			if (optLabel < 0 || x->val[i] >  x->val[optLabel])
-                          optLabel = i;
+                          if (i != excludedClass) {
+                            optLabel = i;
+                          }
 		}
 		y = optLabel;
 
