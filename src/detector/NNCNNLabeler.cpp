@@ -116,8 +116,8 @@ void Classifier::initialExamples(const vector<Instance> &vecInsts,
 }
 
 void Classifier::train(const string &trainFile, const string &devFile,
-  const string &testFile, const string &modelFile,
-  const string &optionFile) {
+    const string &testFile, const string &modelFile,
+    const string &optionFile) {
   if (optionFile != "")
     m_options.load(optionFile);
   m_options.showOptions();
