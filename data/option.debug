@@ -6,6 +6,5 @@ maxIter = 1000
 maxInstance = -1
 outBest = .debug
 hiddenSize = 100
-wordFile = /home/wqs/skip_nostop_single_100features_5minwords_5context_big.txt
 wordEmbSize = 100
 adaAlpha = 0.001

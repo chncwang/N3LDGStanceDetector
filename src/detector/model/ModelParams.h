@@ -2,22 +2,20 @@
 #define SRC_ModelParams_H_
 #include "HyperParams.h"
 #include "MySoftMaxLoss.h"
-#include "ConditionalLSTM.h"
+#include "LSTM1.h"
 
 // Each model consists of two parts, building neural graph and defining output losses.
 class ModelParams{
-private:
-
 public:
 	LookupTable words; // should be initialized outside
 	Alphabet wordAlpha; // should be initialized outside
 	Alphabet featAlpha;
 	UniParams hidden_linear;
-	UniParams olayer_linear; // output
-	ConditionalLSTMParams tweet_left_to_right_lstm_params;
-	ConditionalLSTMParams tweet_right_to_left_lstm_params;
-	ConditionalLSTMParams target_left_to_right_lstm_params;
-	ConditionalLSTMParams target_right_to_left_lstm_params;
+	BiParams olayer_linear; // output
+	LSTM1Params tweet_left_to_right_lstm_params;
+	LSTM1Params tweet_right_to_left_lstm_params;
+	LSTM1Params target_left_to_right_lstm_params;
+	LSTM1Params target_right_to_left_lstm_params;
 public:
 	MySoftMaxLoss loss;
 
@@ -72,7 +70,9 @@ public:
 		checkgrad.add(&words.E, "words E");
 		//checkgrad.add(&hidden_linear.W, "hidden w");
 		//checkgrad.add(&hidden_linear.b, "hidden b");
-		checkgrad.add(&olayer_linear.W, "output layer W");
+		checkgrad.add(&olayer_linear.b, "output layer W");
+		checkgrad.add(&olayer_linear.W1, "output layer W");
+		checkgrad.add(&olayer_linear.W2, "output layer W");
 		checkgrad.add(&tweet_left_to_right_lstm_params.cell.b, "LSTM cell b");
 		checkgrad.add(&tweet_left_to_right_lstm_params.cell.W1, "LSTM cell w1");
 		checkgrad.add(&tweet_left_to_right_lstm_params.cell.W2, "LSTM cell w2");
