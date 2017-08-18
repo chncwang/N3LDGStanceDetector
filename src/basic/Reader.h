@@ -100,19 +100,6 @@ void readLineToInstance(const string &line, Instance *instance) {
     words.push_back(word);
   }
 
-  for (int i = 0; i< words.size(); ++i) {
-    string &word = words.at(i);
-    if (word.at(0) != '#') {
-      for (int j = 0; j < i; ++j) {
-        string &w = words.at(j);
-        if (w.at(0) == '#') {
-          string symbol_removed = w.substr(1, w.size() - 1);
-          swap(symbol_removed, w);
-        }
-      }
-    }
-  }
-
   assert(!words.empty());
 
   instance->m_tweet_words = move(words);
