@@ -32,17 +32,17 @@ void readLineToInstance(const string &line, Instance *instance) {
     if (index <= 8) {
       string firstWord = targetWordVectors.at(i).at(0);
       if (firstWord == "Atheism") {
-        instance->m_target_words = { "atheism" };
+        instance->m_target_words = { "@atheist_eh", "#jesus", "#god", "@atheist_roo", "religion", "god", "#atheist", "atheism", "#atheism", "atheist" };
       } else if (firstWord == "Climate") {
-        instance->m_target_words = { "climate", "change", "is", "a", "real", "concern" };
+        instance->m_target_words = { "action", "@r_faulkerson", "#cop21", "campaign", "po", "support", "paris", "#nowph", "change", "climate" };
       } else if (firstWord == "Feminist") {
-        instance->m_target_words = { "feminist" ,"movement" };
+        instance->m_target_words = { "wrong", "men", "jumptrans", "jumpma-", "disgusting", "jump", "woman", "jumpman", "feminism", "feminist" };
       } else if (firstWord == "Hillary") {
-        instance->m_target_words = { "hillary", "clinton" };
+        instance->m_target_words = { "illegal", "trump", "reporter", "bernie", "emails", "cnn", "sanders", "@hillaryclinton", "clinton", "hillary" };
       } else if (firstWord == "Legalization") {
-        instance->m_target_words = { "legalization", "of" ,"abortion" };
+        instance->m_target_words = { "@kareemdant", "mashed", "potatoes", "pass", "third", "law", "gay", "#thanksgivingclapback", "#abortion", "abortion" };
       } else if (firstWord == "Donald") {
-        instance->m_target_words = { "donald", "trump" };
+        instance->m_target_words = {"shooting", "laquan", "mcdonald", "#trump", "cruz", "clinton", "hillary", "@realdonaldtrump", "donald", "trump" };
       } else {
         std::cout << firstWord << std::endl;
         abort();
