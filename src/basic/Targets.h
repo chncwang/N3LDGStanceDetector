@@ -44,31 +44,4 @@ std::vector<vector<string> > getStanceTargetWordVectors() {
   return result;
 }
 
-bool isTargetWordInTweet(const Feature &feature) {
-  std::vector<std::string> keywords;
-  if (feature.m_target == Target::HILLARY) {
-    keywords = { "hillary", "clinton" };
-  } else if (feature.m_target == Target::TRUMP) {
-    keywords = { "donald", "trump" };
-  } else if (feature.m_target == Target::ATHEISM) {
-    keywords = { "atheism", "atheist" };
-  } else if (feature.m_target == Target::CLIMATE) {
-    keywords = { "climate" };
-  } else if (feature.m_target == Target::FEMINISM) {
-    keywords = { "feminism", "feminist" };
-  } else if (feature.m_target == Target::ABORTION) {
-    keywords = { "abortion", "aborting" };
-  } else {
-    abort();
-  }
-  for (const std::string &keyword : keywords) {
-    auto it = std::find(feature.m_tweet_words.begin(), feature.m_tweet_words.end(), keyword);
-    if (it != feature.m_tweet_words.end()) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
 #endif // !TARGETS_H
