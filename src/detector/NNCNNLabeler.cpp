@@ -255,8 +255,41 @@ void Classifier::train(const string &trainFile, const string &devFile,
       bCurIterBetter = false;
       if (!m_options.outBest.empty())
         decodeInstResults.clear();
+      int non_contain_favor_count = 0;
+      int non_contain_against_count = 0;
+      int non_contain_none_count = 0;
+      int contain_favor_count = 0;
+      int contain_against_count = 0;
+      int contain_none_count = 0;
       for (int idx = 0; idx < devExamples.size(); idx++) {
         Stance result = predict(devExamples[idx].m_feature);
+        if (isTargetWordInTweet(devExamples[idx].m_feature)) {
+          if (result == Stance::FAVOR) {
+            ++contain_favor_count;
+          } else if (result == Stance::AGAINST) {
+            ++contain_against_count;
+          } else if (result == Stance::NONE) {
+            ++contain_none_count;
+          } else {
+            abort();
+          }
+        } else {
+          if (result == Stance::FAVOR) {
+            ++contain_favor_count;
+          } else if (result == Stance::AGAINST) {
+            ++contain_against_count;
+          } else if (result == Stance::NONE) {
+            ++contain_none_count;
+          } else {
+            abort();
+          }
+        }
+        std::cout << "non_contain_favor_count:" << non_contain_favor_count << std::endl;
+        std::cout << "non_contain_against_count:" << non_contain_against_count << std::endl;
+        std::cout << "non_contain_none_count:" << non_contain_none_count << std::endl;
+        std::cout << "contain_favor_count:" << contain_favor_count << std::endl;
+        std::cout << "contain_against_count:" << contain_against_count << std::endl;
+        std::cout << "contain_none_count:" << contain_none_count << std::endl;
 
         devInsts[idx].evaluate(result, favor, against);
 
