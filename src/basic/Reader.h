@@ -169,6 +169,7 @@ void readLineToInstance(const string &line, Instance *instance) {
 }
 
 vector<Instance> readInstancesFromFile(const string &fullFileName) {
+  static std::array<Target, 4> expandable_targets = {Target::ABORTION, Target::ATHEISM, Target::CLIMATE, Target::FEMINISM};
 	vector<string> lines = readLines(fullFileName);
 
 	vector<Instance> instances;
@@ -179,6 +180,24 @@ vector<Instance> readInstancesFromFile(const string &fullFileName) {
 		readLineToInstance(lines.at(i), &ins);
 		instances.push_back(move(ins));
 	}
+
+  vector<Instance> expanded_instances;
+  for (const Instance & ins :instances) {
+    for (Target target : expandable_targets) {
+      if (target == ins.m_target) {
+        continue;
+      }
+      Instance newIns;
+      newIns.copyValuesFrom(ins);
+      newIns.m_target = target;
+      newIns.m_stance = Stance::NONE;
+      expanded_instances.push_back(newIns);
+    }
+  }
+
+  for (Instance &ins : expanded_instances) {
+    instances.push_back(ins);
+  }
 
 	return instances;
 }
