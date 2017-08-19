@@ -49,16 +49,12 @@ public:
       n.setParam(&model.words);
     }
     _left_to_right_target_lstm.init(&model.target_left_to_right_lstm_params, opts.dropProb, true, _pool);
-    _left_to_right_target_lstm._param = &model.target_left_to_right_lstm_params;
 
     _right_to_left_target_lstm.init(&model.target_right_to_left_lstm_params, opts.dropProb, false, _pool);
-    _right_to_left_target_lstm._param = &model.target_right_to_left_lstm_params;
 
     _left_to_right_tweet_lstm.init(&model.tweet_left_to_right_lstm_params, opts.dropProb, true, _pool);
-    _left_to_right_tweet_lstm._param = &model.tweet_left_to_right_lstm_params;
 
     _right_to_left_tweet_lstm.init(&model.tweet_right_to_left_lstm_params, opts.dropProb, false, _pool);
-    _right_to_left_tweet_lstm._param = &model.tweet_right_to_left_lstm_params;
 
     _tweet_concat_node.init(opts.hiddenSize * 2, -1, mem);
     _target_concat_node.init(opts.hiddenSize * 2, -1, mem);
@@ -106,7 +102,7 @@ public:
     _left_to_right_tweet_lstm.forward(_graph, tweet_nodes_ptrs);
     _right_to_left_tweet_lstm.forward(_graph, tweet_nodes_ptrs);
 
-    _tweet_concat_node.forward(_graph, &_left_to_right_target_lstm._hiddens.at(feature.m_tweet_words.size() - 1), &_right_to_left_target_lstm._hiddens.at(0));
+    _tweet_concat_node.forward(_graph, &_left_to_right_tweet_lstm._hiddens.at(feature.m_tweet_words.size() - 1), &_right_to_left_tweet_lstm._hiddens.at(0));
 
     _neural_output.forward(_graph, &_target_concat_node, &_tweet_concat_node);
   }

@@ -1,5 +1,5 @@
 dropProb = 0.5
-batchSize = 64
+batchSize = 1
 wordCutOff = 0
 wordEmbFineTune = false
 maxIter = 1000
