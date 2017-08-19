@@ -44,7 +44,7 @@ public:
 		m_tweet_words = anInstance.m_tweet_words;
 		m_sparse_feats = anInstance.m_sparse_feats;
 		m_stance = anInstance.m_stance;
-		m_target_words = anInstance.m_target_words;
+    m_target = anInstance.m_target;
 	}
 
 	int size() const {
@@ -62,14 +62,11 @@ public:
 	vector<string> m_tweet_words;
 	vector<string> m_sparse_feats;
 	Stance m_stance;
-	std::vector<std::string> m_target_words;
+  Target m_target;
 };
 
 std::string Instance::tostring() {
-	string result = "target: ";
-	for (string & w : m_target_words) {
-		result += w + " ";
-	}
+	string result = "target: " + m_target;
 	result += "\ntweet: ";
 
 	for (string & w : m_tweet_words) {

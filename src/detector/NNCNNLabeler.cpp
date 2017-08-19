@@ -25,7 +25,7 @@ int Classifier::createAlphabet(const vector<Instance> &vecInsts) {
     const Instance *pInstance = &vecInsts[numInstance];
 
     vector<const string *> words;
-    for (const string &w : pInstance->m_target_words) {
+    for (const string &w : getTargetWords(pInstance->m_target)) {
       words.push_back(&w);
     }
 
@@ -66,7 +66,7 @@ int Classifier::addTestAlpha(const vector<Instance> &vecInsts) {
     const Instance *pInstance = &vecInsts[numInstance];
 
     vector<const string *> words;
-    for (const string &w : pInstance->m_target_words) {
+    for (const string &w : getTargetWords(pInstance->m_target)) {
       words.push_back(&w);
     }
 
@@ -96,7 +96,7 @@ int Classifier::addTestAlpha(const vector<Instance> &vecInsts) {
 
 void Classifier::extractFeature(Feature &feat, const Instance *pInstance) {
   feat.m_tweet_words = pInstance->m_tweet_words;
-  feat.m_target_words = pInstance->m_target_words;
+  feat.m_target = pInstance->m_target;
   feat.m_sparse_feats = pInstance->m_sparse_feats;
 }
 
@@ -128,7 +128,7 @@ void Classifier::train(const string &trainFile, const string &devFile,
 	vector<Instance> rawtrainInsts = readInstancesFromFile(trainFile);
 	vector<Instance> trainInsts;
 	for (Instance &ins : rawtrainInsts) {
-		if (ins.m_target_words.at(0) == "#hillaryclinton") {
+		if (ins.m_target == Target::HILLARY) {
 			continue;
 		}
 		trainInsts.push_back(ins);

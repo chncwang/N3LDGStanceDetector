@@ -74,22 +74,22 @@ void readLineToInstance(const string &line, Instance *instance) {
 		if (index <= 8) {
 			string firstWord = targetWordVectors.at(i).at(0);
 			if (firstWord == "Atheism") {
-				instance->m_target_words = {"#atheism"};
+        instance->m_target = Target::ATHEISM;
 			}
 			else if (firstWord == "Climate") {
-				instance->m_target_words = {"#climatechange"};
+        instance->m_target = Target::CLIMATE;
 			}
 			else if (firstWord == "Feminist") {
-				instance->m_target_words = { "#feminism" };
+        instance->m_target = Target::FEMINISM;
 			}
 			else if (firstWord == "Hillary") {
-				instance->m_target_words = {"#hillaryclinton"};
+        instance->m_target = Target::HILLARY;
 			}
 			else if (firstWord == "Legalization") {
-				instance->m_target_words = {"#prochoice"};
+        instance->m_target = Target::ABORTION;
 			}
 			else if (firstWord == "Donald") {
-				instance->m_target_words = { "#donaldtrump" };
+        instance->m_target = Target::TRUMP;
 			}
 			else {
                           std::cout <<firstWord << std::endl;

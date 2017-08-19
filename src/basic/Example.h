@@ -7,6 +7,7 @@
 #include <array>
 #include "Stance.h"
 #include <algorithm>
+#include "Targets.h"
 
 using namespace std;
 
@@ -14,14 +15,13 @@ class Feature
 {
 public:
 	vector<std::string> m_tweet_words;
-	vector<std::string> m_target_words;
 	vector<std::string> m_sparse_feats;
+  Target m_target;
 public:
 	void clear()
 	{
 		m_tweet_words.clear();
 		m_sparse_feats.clear();
-		m_target_words.clear();
 	}
 };
 

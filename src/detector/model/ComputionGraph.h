@@ -52,7 +52,8 @@ public:
     _graph->train = bTrain;
 
 	vector<std::string> normalizedTargetWords;
-	for (const std::string &w : feature.m_target_words) {
+  const std::vector<std::string> &target_words = getTargetWords(feature.m_target);
+	for (const std::string &w : target_words) {
 		normalizedTargetWords.push_back(normalize_to_lowerwithdigit(w));
 	}
 
@@ -65,13 +66,13 @@ public:
 	}
 
 	vector<PNode> inputNodes;
-	int totalSize = feature.m_tweet_words.size() + feature.m_target_words.size();
+	int totalSize = feature.m_tweet_words.size() + target_words.size();
 	for (int i = 0; i < totalSize; ++i) {
 		inputNodes.push_back(&_inputNodes.at(i));
 	}
 
-	_left2right.setParam(&_modelParams->target_left_to_right_lstm_params, &_modelParams->tweet_left_to_right_lstm_params, feature.m_target_words.size());
-	_right2left.setParam(&_modelParams->target_right_to_left_lstm_params, &_modelParams->tweet_right_to_left_lstm_params, feature.m_target_words.size());
+	_left2right.setParam(&_modelParams->target_left_to_right_lstm_params, &_modelParams->tweet_left_to_right_lstm_params, target_words.size());
+	_right2left.setParam(&_modelParams->target_right_to_left_lstm_params, &_modelParams->tweet_right_to_left_lstm_params, target_words.size());
 
 	_left2right.forward(_graph, inputNodes, normalizedTargetWords.size());
 	_right2left.forward(_graph, inputNodes, normalizedTargetWords.size());
