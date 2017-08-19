@@ -275,21 +275,15 @@ void Classifier::train(const string &trainFile, const string &devFile,
           }
         } else {
           if (result == Stance::FAVOR) {
-            ++contain_favor_count;
+            ++non_contain_favor_count;
           } else if (result == Stance::AGAINST) {
-            ++contain_against_count;
+            ++non_contain_against_count;
           } else if (result == Stance::NONE) {
-            ++contain_none_count;
+            ++non_contain_none_count;
           } else {
             abort();
           }
         }
-        std::cout << "non_contain_favor_count:" << non_contain_favor_count << std::endl;
-        std::cout << "non_contain_against_count:" << non_contain_against_count << std::endl;
-        std::cout << "non_contain_none_count:" << non_contain_none_count << std::endl;
-        std::cout << "contain_favor_count:" << contain_favor_count << std::endl;
-        std::cout << "contain_against_count:" << contain_against_count << std::endl;
-        std::cout << "contain_none_count:" << contain_none_count << std::endl;
 
         devInsts[idx].evaluate(result, favor, against);
 
@@ -299,6 +293,12 @@ void Classifier::train(const string &trainFile, const string &devFile,
           decodeInstResults.push_back(curDecodeInst);
         }
       }
+      std::cout << "non_contain_favor_count:" << non_contain_favor_count << std::endl;
+      std::cout << "non_contain_against_count:" << non_contain_against_count << std::endl;
+      std::cout << "non_contain_none_count:" << non_contain_none_count << std::endl;
+      std::cout << "contain_favor_count:" << contain_favor_count << std::endl;
+      std::cout << "contain_against_count:" << contain_against_count << std::endl;
+      std::cout << "contain_none_count:" << contain_none_count << std::endl;
 
       auto time_end = std::chrono::high_resolution_clock::now();
       std::cout << "Dev finished. Total time taken is: "
